@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_map"
+            android:icon="@drawable/ic_google_map"
+            android:title="Map" />
+        <item
+            android:id="@+id/nav_add_question"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Add Question" />
+        <item
+            android:id="@+id/nav_my_profile"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="My Profile" />
+        <item
+            android:id="@+id/nav_add_friend"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Add Friend" />
+        <item
+            android:id="@+id/nav_my_friends"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="My Friends" />
+    </group>
+
+    <item android:title="Options">
+        <menu>
+            <item
+                android:id="@+id/nav_setings"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Setings" />
+            <item
+                android:id="@+id/nav_log_out"
+                android:icon="@drawable/ic_menu_send"
+                android:title="LogOut" />
+        </menu>
+    </item>
+
+</menu>
