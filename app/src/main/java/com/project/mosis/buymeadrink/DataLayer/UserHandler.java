@@ -1,17 +1,23 @@
 package com.project.mosis.buymeadrink.DataLayer;
 
+import android.content.Context;
+
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
+import com.project.mosis.buymeadrink.Utils.VolleyHelperSingleton;
 
 public class UserHandler {
 
     private User user = null;
+    private VolleyHelperSingleton mVolleyHelper;
+    public UserHandler(Context context, User user){
 
-    public UserHandler(User user){
         this.user = user;
+        this.mVolleyHelper = VolleyHelperSingleton.getInstance(context);
     }
     public boolean LogIn(String Tag){
 
         //TODO: Add code for log in (Requset to server with Volley)
+
         return true;
     }
     public boolean LogOut(String Tag){

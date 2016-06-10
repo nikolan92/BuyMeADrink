@@ -8,7 +8,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
-import com.project.mosis.buymeadrink.Application.AppController;
+import com.project.mosis.buymeadrink.Application.MyAplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 
@@ -40,7 +40,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                 }else{
 
                     //TODO: send request to server or SqlLite database to get user info, then call ((MyApplication) this.getApplication()).setSomeVariable("foo");
-                    ((AppController) SplashScreenActivity.this.getApplication()).setUser(new User("43243243","Nikola","Nikolic","92nikolan@gmail.com","someUrl"));
+                    ((MyAplication) SplashScreenActivity.this.getApplication()).setUser(new User("43243243","Nikola","Nikolic","92nikolan@gmail.com","someUrl"));
                     //dummydata
                     startActivity(new Intent(SplashScreenActivity.this,MainActivity.class));
                     finish();
