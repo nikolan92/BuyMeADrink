@@ -11,17 +11,17 @@ public class User {
     private String email;
     private String password;
     private String imgUrl;
-    private List<User> friends;
+//    private List<User> friends;
 
     //this constructor is used when user going to login or register
-    public User(String id, String firstName, String lastName, String email, String password, String imgUrl, List<User> friends) {
+    public User(String id, String firstName, String lastName, String email, String password, String imgUrl) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.imgUrl = imgUrl;
-        this.friends = friends;
+//        this.friends = friends;
     }
 
     //this constructor is used when user sent request to the server for his friends

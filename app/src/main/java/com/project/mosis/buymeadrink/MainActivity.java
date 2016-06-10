@@ -1,5 +1,6 @@
 package com.project.mosis.buymeadrink;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -8,16 +9,27 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 
+import com.android.volley.VolleyError;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
+import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
+import com.project.mosis.buymeadrink.DataLayer.EventListeners.OnErrorListener;
+import com.project.mosis.buymeadrink.DataLayer.EventListeners.OnResponseListener;
+import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 import com.project.mosis.buymeadrink.SearchResultData.SearchResult;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -27,6 +39,7 @@ public class MainActivity extends AppCompatActivity
     private FloatingSearchView mSearchView;
     private DrawerLayout drawer;
     private GoogleMap mMap;
+    UserHandler userHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +54,23 @@ public class MainActivity extends AppCompatActivity
 
         setupFloatingSearch();
         setupDrawer();
+        userHandler = new UserHandler(this,new User("33","n","3","d","d"));
+    }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+
+        // Add a marker in Sydney, Australia, and move the camera.
+        LatLng sydney = new LatLng(-34, 151);
+        MarkerOptions markerOptions = new MarkerOptions().position(sydney).title("Marker in Sydney");
+        Marker m = mMap.addMarker(markerOptions);
+
+        m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));//moze kasnije dodavanje ikone
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        //markerOptions.
+
     }
 
     private void setupFloatingSearch(){
@@ -120,9 +150,23 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_my_friends) {
 
         } else if (id == R.id.nav_setings) {
+            Toast.makeText(MainActivity.this,"Request send Setings",Toast.LENGTH_SHORT).show();
+            userHandler.logIn("name", "pass", "tag", new OnResponseListener() {
+                @Override
+                public void OnResponse(JSONObject userData) {
+                    Toast.makeText(MainActivity.this, "called from settings" + userData.toString(), Toast.LENGTH_LONG).show();
+                }
+            }, new OnErrorListener() {
+                @Override
+                public void OnError() {
+                    Toast.makeText(MainActivity.this,"Error during logIn try again!",Toast.LENGTH_LONG).show();
+                }
+            });
 
         } else if (id == R.id.nav_log_out) {
-
+            SaveSharedPreference.clearUserId(this.getApplicationContext());
+            startActivity(new Intent(this,LogInActivity.class));
+            finish();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -130,15 +174,5 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
 
-
-        // Add a marker in Sydney, Australia, and move the camera.
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
-    }
 }

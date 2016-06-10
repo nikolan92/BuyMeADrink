@@ -16,6 +16,9 @@ public class SaveSharedPreference {
         editor.putString(PREF_USER_ID,id);
         editor.commit();
     }
+    public static void clearUserId(Context context){
+        getSharedPreferences(context).edit().remove(PREF_USER_ID).commit();
+    }
     public static String GetUserId(Context context){
         return getSharedPreferences(context).getString(PREF_USER_ID,"");
     }
