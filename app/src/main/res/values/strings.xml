@@ -4,5 +4,22 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="login_text">Login</string>
+    <string name="login_email">E-mail: </string>
+    <string name="login_password">Password: </string>
+    <string name="login_loginBtn">Login</string>
+    <string name="login_signupBtn">Signup</string>
+    <string name="login_signupText">If you don\'t have account please: </string>
+    <string name="register_text">Register</string>
+    <string name="register_repeatPassword">Repeat password: </string>
+    <string name="register_registerBtn">Register</string>
+    <string name="register_username">Username: </string>
+    <string name="user_profile_text">User profile</string>
+    <string name="user_profile_age">Age: </string>
+    <string name="user_profile_firstName">First Name: </string>
+    <string name="user_profile_lastName">Last Name: </string>
+    <string name="user_profile_saveBtn">Save</string>
+    <string name="user_profile_cancelBtn">Cancel</string>
+    <string name="user_profile_image">user_image</string>
     <string name="action_settings">Settings</string>
 </resources>

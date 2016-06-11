@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 
@@ -141,7 +142,8 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_my_profile) {
 
-        } else if (id == R.id.nav_my_profile) {
+            Intent i = new Intent(this, UserProfileActivity.class);
+            startActivity(i);
 
         } else if (id == R.id.nav_add_friend) {
 
