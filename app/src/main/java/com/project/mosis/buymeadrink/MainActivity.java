@@ -154,14 +154,11 @@ public class MainActivity extends AppCompatActivity
             * */
             final OnLogInListener listener = new OnLogInListener(this);
 
-            UserHandler userHandler = new UserHandler(this,new User("name","s","s","s","s"));
             userHandler.logIn("s", "s", "Tag", listener);
 
-            startActivity(new Intent(this,LogInActivity.class));
-            finish();
+
         } else if (id == R.id.nav_log_out) {
             SaveSharedPreference.clearUserId(this.getApplicationContext());
-
             finish();
         }
 
