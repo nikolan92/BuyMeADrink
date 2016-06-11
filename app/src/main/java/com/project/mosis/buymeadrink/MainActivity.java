@@ -29,6 +29,7 @@ import com.project.mosis.buymeadrink.SearchResultData.SearchResult;
 
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
@@ -148,32 +149,69 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_setings) {
 
-
-            Toast.makeText(MainActivity.this,"Request send Setings",Toast.LENGTH_SHORT).show();
+            /**
+             * Now here all we need to do is to make variable to our static class and make new one, then pass to the userHanler
+            * */
+            final OnLogInListener listener = new OnLogInListener(this);
 
             UserHandler userHandler = new UserHandler(this,new User("name","s","s","s","s"));
-            userHandler.logIn("s", "s", "Tag", new VolleyCallBack() {
-                @Override
-                public void onSuccess(JSONObject result) {
-                    Toast.makeText(MainActivity.this,result.toString(),Toast.LENGTH_SHORT).show();
-                }
+            userHandler.logIn("s", "s", "Tag", listener);
 
-                @Override
-                public void onFailed(String error) {
-                    Toast.makeText(MainActivity.this,error.toString(),Toast.LENGTH_SHORT).show();
-                }
-            });
-//            userHandler.logIn("name", "pass", "tag",);
-//
+            startActivity(new Intent(this,LogInActivity.class));
+            finish();
         } else if (id == R.id.nav_log_out) {
             SaveSharedPreference.clearUserId(this.getApplicationContext());
-            startActivity(new Intent(this,LogInActivity.class));
+
             finish();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        //Toast.makeText(this,"MainActivity Destroyed.",Toast.LENGTH_SHORT).show();
+        super.onDestroy();
+    }
+
+    /**
+    *This function will do some job after logIn was successful.
+    * */
+    public void onLogIn(JSONObject result){
+        Toast.makeText(MainActivity.this, result.toString(),Toast.LENGTH_SHORT).show();
+    }
+    /**
+     *This function will do some job if logIn was unsuccessful.
+     * */
+    public void onLogInFailure(String error){
+        Toast.makeText(MainActivity.this, "Error occur:\n"+ error.toString(),Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Static inner classes do not hold an implicit reference to their outher clases, so activity will not be leaked.
+     * Also because i need to access to an activity method i need to hold a reference to it. But i keep weakReference,
+     * so GC will not be prevented from deleting it. Because of that i need to check whether activity still exist.
+     * */
+    private static class OnLogInListener implements VolleyCallBack{
+        private final WeakReference<MainActivity> mActivity;
+        OnLogInListener(MainActivity mainActivity){
+            mActivity = new WeakReference<MainActivity>(mainActivity);
+        }
+        @Override
+        public void onSuccess(JSONObject result) {
+            MainActivity mainActivity = mActivity.get();
+            if(mainActivity!=null)//If activity still exist then do some job, if not just return;
+                mainActivity.onLogIn(result);
+        }
+
+        @Override
+        public void onFailed(String error) {
+            MainActivity mainActivity = mActivity.get();
+            if(mainActivity!=null)//If activity still exist then do some job, if not just return;
+                mainActivity.onLogInFailure(error);
+        }
     }
 
 
