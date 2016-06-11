@@ -23,8 +23,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
+import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 import com.project.mosis.buymeadrink.SearchResultData.SearchResult;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -148,6 +151,18 @@ public class MainActivity extends AppCompatActivity
 
             Toast.makeText(MainActivity.this,"Request send Setings",Toast.LENGTH_SHORT).show();
 
+            UserHandler userHandler = new UserHandler(this,new User("name","s","s","s","s"));
+            userHandler.logIn("s", "s", "Tag", new VolleyCallBack() {
+                @Override
+                public void onSuccess(JSONObject result) {
+                    Toast.makeText(MainActivity.this,result.toString(),Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailed(String error) {
+                    Toast.makeText(MainActivity.this,error.toString(),Toast.LENGTH_SHORT).show();
+                }
+            });
 //            userHandler.logIn("name", "pass", "tag",);
 //
         } else if (id == R.id.nav_log_out) {
