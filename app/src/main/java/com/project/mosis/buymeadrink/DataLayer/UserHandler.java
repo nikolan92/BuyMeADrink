@@ -8,8 +8,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.maps.model.LatLng;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
-import com.project.mosis.buymeadrink.DataLayer.EventListeners.OnErrorListener;
-import com.project.mosis.buymeadrink.DataLayer.EventListeners.OnResponseListener;
+import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
 import com.project.mosis.buymeadrink.Utils.VolleyHelperSingleton;
 
 import org.json.JSONObject;
@@ -32,19 +31,21 @@ public class UserHandler {
      * If login is successful then onResponseLisener will run otherwise onErrorListener will be triggered.
      *<p>
      * */
-    public void logIn(String username , String password, String Tag, final OnResponseListener onResponseListener, final OnErrorListener onErrorListener){
+    public void logIn(String username , String password, String Tag, final VolleyCallBack volleyCallBack){
         String url = "http://api.androidhive.info/volley/person_object.json";
 
         //this.onResponseListener = onResponseListener;
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                onResponseListener.OnResponse(response);
+                if(volleyCallBack!=null)
+                    volleyCallBack.onSuccess(response);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                onErrorListener.OnError();
+                if(volleyCallBack!=null)
+                    volleyCallBack.onFailed(error.toString());
             }
         }
         );
@@ -85,7 +86,7 @@ public class UserHandler {
         return this.user;
     }
 
-    public void CancelAllRequestWithTag(String Tag){
+    public void CancelAllRequestWithTag(String tag){
         mVolleyHelper.cancelPendingRequests(tag);
         //TODO: When activity call onStop() this function must be caled because if you not call this fun Volley will call your handler and app will crash
     }

@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.Toast;
 
 
-import com.android.volley.VolleyError;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,12 +23,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
-import com.project.mosis.buymeadrink.DataLayer.EventListeners.OnErrorListener;
-import com.project.mosis.buymeadrink.DataLayer.EventListeners.OnResponseListener;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 import com.project.mosis.buymeadrink.SearchResultData.SearchResult;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -130,7 +125,6 @@ public class MainActivity extends AppCompatActivity
             }
     }
 
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -150,19 +144,12 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_my_friends) {
 
         } else if (id == R.id.nav_setings) {
-            Toast.makeText(MainActivity.this,"Request send Setings",Toast.LENGTH_SHORT).show();
-            userHandler.logIn("name", "pass", "tag", new OnResponseListener() {
-                @Override
-                public void OnResponse(JSONObject userData) {
-                    Toast.makeText(MainActivity.this, "called from settings" + userData.toString(), Toast.LENGTH_LONG).show();
-                }
-            }, new OnErrorListener() {
-                @Override
-                public void OnError() {
-                    Toast.makeText(MainActivity.this,"Error during logIn try again!",Toast.LENGTH_LONG).show();
-                }
-            });
 
+
+            Toast.makeText(MainActivity.this,"Request send Setings",Toast.LENGTH_SHORT).show();
+
+//            userHandler.logIn("name", "pass", "tag",);
+//
         } else if (id == R.id.nav_log_out) {
             SaveSharedPreference.clearUserId(this.getApplicationContext());
             startActivity(new Intent(this,LogInActivity.class));
