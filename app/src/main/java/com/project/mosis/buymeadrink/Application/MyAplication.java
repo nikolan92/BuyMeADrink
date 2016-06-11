@@ -11,7 +11,7 @@ public class MyAplication extends Application{
 
     private User user=null;
 
-    public User GetUser(){
+    public User getUser(){
         return this.user;
     }
     public void setUser(User user){

@@ -23,7 +23,6 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/user_profile_text"
-            android:id="@+id/textView3"
             android:layout_gravity="center_horizontal" />
 
         <ImageView
@@ -44,8 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/register_username"
-            android:id="@+id/passwordView" />
+            android:text="@string/register_username"/>
 
         <EditText
             android:layout_width="match_parent"
@@ -58,8 +56,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/login_email"
-            android:id="@+id/emailView" />
+            android:text="@string/login_email"/>
 
         <EditText
             android:layout_width="match_parent"
@@ -72,8 +69,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/login_password"
-            android:id="@+id/passwordView" />
+            android:text="@string/login_password"/>
 
         <EditText
             android:layout_width="match_parent"
@@ -86,8 +82,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/user_profile_age"
-            android:id="@+id/passwordView" />
+            android:text="@string/user_profile_age"/>
 
         <EditText
             android:layout_width="match_parent"
@@ -100,8 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/user_profile_firstName"
-            android:id="@+id/passwordView" />
+            android:text="@string/user_profile_firstName"/>
 
         <EditText
             android:layout_width="match_parent"
@@ -114,8 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/user_profile_lastName"
-            android:id="@+id/passwordView" />
+            android:text="@string/user_profile_lastName"/>
 
         <EditText
             android:layout_width="match_parent"

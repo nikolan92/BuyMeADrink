@@ -16,7 +16,6 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/register_text"
-        android:id="@+id/textView3"
         android:layout_gravity="center_horizontal" />
 
     <Space
@@ -29,8 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/login_email"
-        android:id="@+id/emailView" />
+        android:text="@string/login_email"/>
 
     <EditText
         android:layout_width="match_parent"
@@ -43,8 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/login_password"
-        android:id="@+id/passwordView" />
+        android:text="@string/login_password"/>
 
     <EditText
         android:layout_width="match_parent"
@@ -57,8 +54,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/register_repeatPassword"
-        android:id="@+id/passwordView" />
+        android:text="@string/register_repeatPassword"/>
 
     <EditText
         android:layout_width="match_parent"
@@ -71,8 +67,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/register_username"
-        android:id="@+id/passwordView" />
+        android:text="@string/register_username"/>
 
     <EditText
         android:layout_width="match_parent"
@@ -91,7 +86,7 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="@string/register_registerBtn"
-        android:id="@+id/signupBtn"
+        android:id="@+id/register_act_sign_up_btn"
         android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

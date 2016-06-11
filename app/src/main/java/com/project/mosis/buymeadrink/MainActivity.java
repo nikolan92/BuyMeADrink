@@ -3,13 +3,13 @@ package com.project.mosis.buymeadrink;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 
@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity
         mSearchView.setOnLeftMenuClickListener(new FloatingSearchView.OnLeftMenuClickListener() {
             @Override
             public void onMenuOpened() {
-                //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.openDrawer(GravityCompat.START);
             }
 
@@ -136,14 +137,11 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_map) {
-            // Handle the camera action
-        } else if (id == R.id.nav_add_question) {
+        if (id == R.id.nav_add_question) {
 
         } else if (id == R.id.nav_my_profile) {
-
             Intent i = new Intent(this, UserProfileActivity.class);
-            startActivity(i);
+            startActivity(new Intent(this,UserProfileActivity.class));
 
         } else if (id == R.id.nav_add_friend) {
 
@@ -160,7 +158,10 @@ public class MainActivity extends AppCompatActivity
 
 
         } else if (id == R.id.nav_log_out) {
-            SaveSharedPreference.clearUserId(this.getApplicationContext());
+            //Clear Shared Preference and start LogIn again
+            SaveSharedPreference.clearUser(this.getApplicationContext());
+            //start Log in activity and clear back stack
+            startActivity(new Intent(MainActivity.this,LogInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
             finish();
         }
 

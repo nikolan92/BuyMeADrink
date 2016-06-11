@@ -22,9 +22,17 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
+
+
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
-    compile 'com.google.android.gms:play-services:9.0.2'//mape
-    compile 'com.github.arimorty:floatingsearchview:2.0.1'//persistent search
-    compile 'com.android.volley:volley:1.0.0'// volley
+    //mape
+    compile 'com.google.android.gms:play-services:9.0.2'
+    //persistent search
+    compile 'com.github.arimorty:floatingsearchview:2.0.1'
+    //Volley
+    compile 'com.android.volley:volley:1.0.0'
+//    compile 'com.android.support:support-v4:23.4.0'
+    //GSON dependensy need for serialize user object
+    compile 'com.google.code.gson:gson:2.5'
 }

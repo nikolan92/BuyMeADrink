@@ -21,6 +21,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         Animation animation = AnimationUtils.loadAnimation(this,R.anim.move_up);
         ImageView imageView = (ImageView) findViewById(R.id.logo_splash_screen);
+        assert imageView != null;
         imageView.setAnimation(animation);
 
 
@@ -29,13 +30,13 @@ public class SplashScreenActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(SaveSharedPreference.GetUserId(SplashScreenActivity.this).length() == 0)
+                if(SaveSharedPreference.GetUser(SplashScreenActivity.this) == null)
                 {
                     startActivity(new Intent(SplashScreenActivity.this,LogInActivity.class));
                     //TODO: set sharedPreference in logIn activity if is login succesful
                     //TODO: after success login set user var with ((MyApplication) this.getApplication()).setSomeVariable("foo");
                     //example
-                    SaveSharedPreference.SetUserId(SplashScreenActivity.this,"someId");
+//                    SaveSharedPreference.SetUser(SplashScreenActivity.this,"someId");
                     finish();
                 }else{
 
