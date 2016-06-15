@@ -55,7 +55,9 @@ public class MainActivity extends AppCompatActivity
 
         setupFloatingSearch();
         setupDrawer();
-        userHandler = new UserHandler(this,new User("33","n","3","d","d"));
+
+        //TODO:Get user from global var and make userHandler with that user
+        userHandler = new UserHandler(this);
     }
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -155,6 +157,7 @@ public class MainActivity extends AppCompatActivity
             final OnLogInListener listener = new OnLogInListener(this);
 
             userHandler.logIn("s", "s", "Tag", listener);
+
 
 
         } else if (id == R.id.nav_log_out) {

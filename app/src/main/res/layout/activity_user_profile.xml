@@ -43,19 +43,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/register_username"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:ems="10"
-            android:id="@+id/usernameText" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/login_email"/>
 
         <EditText
@@ -63,7 +50,7 @@
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
             android:ems="10"
-            android:id="@+id/emailText" />
+            android:id="@+id/user_profile_layout_email" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -76,7 +63,7 @@
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:ems="10"
-            android:id="@+id/passwordText" />
+            android:id="@+id/user_profile_layout_password" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -88,7 +75,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:id="@+id/ageText"
+            android:id="@+id/user_profile_layout_age"
             android:inputType="text" />
 
         <TextView
@@ -101,7 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:id="@+id/firstnameText"
+            android:id="@+id/user_profile_layout_first_name"
             android:inputType="text" />
 
         <TextView
@@ -114,7 +101,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:id="@+id/lastnameText"
+            android:id="@+id/user_profile_layout_lastname"
             android:inputType="text" />
 
         <Space

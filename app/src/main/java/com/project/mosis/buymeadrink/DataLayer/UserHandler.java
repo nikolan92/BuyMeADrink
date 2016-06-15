@@ -1,6 +1,7 @@
 package com.project.mosis.buymeadrink.DataLayer;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -9,20 +10,24 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.maps.model.LatLng;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
+import com.project.mosis.buymeadrink.Utils.Constants;
 import com.project.mosis.buymeadrink.Utils.VolleyHelperSingleton;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class UserHandler {
 
     private User user = null;
     private VolleyHelperSingleton mVolleyHelper;
-    //private OnResponseListener logInListener;
-
 
     public UserHandler(Context context, User user){
 
         this.user = user;
+        this.mVolleyHelper = VolleyHelperSingleton.getInstance(context);
+    }
+    public UserHandler(Context context){
+
         this.mVolleyHelper = VolleyHelperSingleton.getInstance(context);
     }
     /**
@@ -31,11 +36,18 @@ public class UserHandler {
      * If login is successful then onResponseLisener will run otherwise onErrorListener will be triggered.
      *<p>
      * */
-    public void logIn(String username , String password, String Tag, final VolleyCallBack volleyCallBack){
-        String url = "http://api.androidhive.info/volley/person_object.json";
+    public void logIn(String email , String password, String tag, final VolleyCallBack volleyCallBack){
+        //String url = "http://api.androidhive.info/volley/person_object.json";
 
-        //this.onResponseListener = onResponseListener;
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        JSONObject jsonData = new JSONObject();
+        try{
+            jsonData.put("email",email);
+            jsonData.put("password",password);
+        }catch (JSONException exception){
+            Log.e("UserHandler",exception.toString());
+        }
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, Constants.LOG_IN_URL, jsonData, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 if(volleyCallBack!=null)
@@ -49,7 +61,7 @@ public class UserHandler {
             }
         }
         );
-
+        jsonObjectRequest.setTag(tag);
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
 
         //TODO: Add code for log in (Requset to server with Volley)

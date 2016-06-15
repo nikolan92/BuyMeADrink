@@ -30,7 +30,8 @@ public class SplashScreenActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(SaveSharedPreference.GetUser(SplashScreenActivity.this) == null)
+                User user = SaveSharedPreference.GetUser(SplashScreenActivity.this);
+                if(user == null)
                 {
                     startActivity(new Intent(SplashScreenActivity.this,LogInActivity.class));
                     //TODO: set sharedPreference in logIn activity if is login succesful
@@ -41,12 +42,12 @@ public class SplashScreenActivity extends AppCompatActivity {
                 }else{
 
                     //TODO: send request to server or SqlLite database to get user info, then call ((MyApplication) this.getApplication()).setSomeVariable("foo");
-                    ((MyAplication) SplashScreenActivity.this.getApplication()).setUser(new User("43243243","Nikola","Nikolic","92nikolan@gmail.com","someUrl"));
+                    ((MyAplication) SplashScreenActivity.this.getApplication()).setUser(user);
                     //dummydata
                     startActivity(new Intent(SplashScreenActivity.this,MainActivity.class));
                     finish();
                 }
             }
-        }, 300);
+        }, 400);
     }
 }
