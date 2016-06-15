@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.project.mosis.buymeadrink.Application.MyAplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
@@ -53,11 +55,13 @@ public class MainActivity extends AppCompatActivity
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         mSearchView = (FloatingSearchView)findViewById(R.id.floating_search_view);
 
+        //TODO:Get user from global var and make userHandler with that user
+        User user = ((MyAplication) MainActivity.this.getApplication()).getUser();
+        userHandler = new UserHandler(this,user);
+
         setupFloatingSearch();
         setupDrawer();
 
-        //TODO:Get user from global var and make userHandler with that user
-        userHandler = new UserHandler(this);
     }
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -109,7 +113,17 @@ public class MainActivity extends AppCompatActivity
 
     private void setupDrawer(){
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        assert navigationView != null;
         navigationView.setNavigationItemSelectedListener(this);
+        View hView = navigationView.getHeaderView(0);
+        final TextView name = (TextView) hView.findViewById(R.id.nav_user_name);
+        final TextView email = (TextView) hView.findViewById(R.id.nav_user_email);
+
+        assert name != null;
+        name.setText(userHandler.GetUser().getName());
+        assert email != null;
+        email.setText(userHandler.GetUser().getEmail());
+
         assert drawer != null;
         drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
@@ -154,11 +168,9 @@ public class MainActivity extends AppCompatActivity
             /**
              * Now here all we need to do is to make variable to our static class and make new one, then pass to the userHanler
             * */
-            final OnLogInListener listener = new OnLogInListener(this);
+            //final OnLogInListener listener = new OnLogInListener(this);
 
-            userHandler.logIn("s", "s", "Tag", listener);
-
-
+            //userHandler.logIn("s", "s", "Tag", listener);
 
         } else if (id == R.id.nav_log_out) {
             //Clear Shared Preference and start LogIn again

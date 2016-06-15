@@ -2,12 +2,14 @@ package com.project.mosis.buymeadrink.DataLayer;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
 import com.project.mosis.buymeadrink.Utils.Constants;
@@ -36,9 +38,9 @@ public class UserHandler {
      * If login is successful then onResponseLisener will run otherwise onErrorListener will be triggered.
      *<p>
      * */
-    public void logIn(String email , String password, String tag, final VolleyCallBack volleyCallBack){
-        //String url = "http://api.androidhive.info/volley/person_object.json";
+    public static void logIn(Context context, String email , String password, String tag, final VolleyCallBack volleyCallBack){
 
+        VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
         JSONObject jsonData = new JSONObject();
         try{
             jsonData.put("email",email);
@@ -63,21 +65,61 @@ public class UserHandler {
         );
         jsonObjectRequest.setTag(tag);
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
-
-        //TODO: Add code for log in (Requset to server with Volley)
     }
     public void logOut(String Tag){
         //Ovo nam nece ni treba sobzirom da status da li je korisnik ulogovan ili ne pamtimo u shared preferencis
         //TODO: Add code for log out (Requset to server with Volley)
     }
-    public String register(String Tag){
+    public static void register(Context context, User user, String tag, final VolleyCallBack  volleyCallBack){
 
-        //TODO: Add code for Register (Requset to server with Volley)
-        return "Some response from server";
+        VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
+        JSONObject jsonData= null;
+        try {
+            jsonData = new JSONObject(new Gson().toJson(user));
+        }catch (JSONException exception){
+            Log.e("UserHandler",exception.toString());
+        }
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, Constants.USER_URL, jsonData, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onFailed(error.toString());
+            }
+        }
+        );
+        jsonObjectRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
-    public boolean updateInfo(String Tag){
-        //TODO: Add code for UpdateInfo (Requset to server with Volley)
-        return true;
+    public static void updateUserInfo(Context context, User user, String tag, final VolleyCallBack  volleyCallBack){
+        VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
+        JSONObject jsonData= null;
+        try {
+            jsonData = new JSONObject(new Gson().toJson(user));
+        }catch (JSONException exception){
+            Log.e("UserHandler",exception.toString());
+        }
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, Constants.USER_URL, jsonData, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onFailed(error.toString());
+            }
+        }
+        );
+        jsonObjectRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
     public boolean reiseRank(String Tag){
         //TODO: Add code for RaiseRank (Requset to server with Volley)
@@ -93,7 +135,9 @@ public class UserHandler {
     public void sendMyLocation(LatLng currentLocation){
 
     }
-
+    public void SetUser(User user){
+         this.user = user;
+    }
     public User GetUser(){
         return this.user;
     }

@@ -29,7 +29,6 @@ import java.lang.ref.WeakReference;
 public class LogInActivity extends AppCompatActivity {
     private EditText inputEmail,inputPassword;
     private TextInputLayout inputLayoutEmail,inputLayoutPassword;
-    private UserHandler userHandler;
     final String REQUSET_TAG = "LogInActivity";
 
     @Override
@@ -45,7 +44,6 @@ public class LogInActivity extends AppCompatActivity {
         inputLayoutEmail = (TextInputLayout) findViewById(R.id.login_input_layout_email);
         inputLayoutPassword = (TextInputLayout) findViewById(R.id.login_input_layout_password);
 
-        userHandler = new UserHandler(this);
 
         assert signUp != null;
         signUp.setOnClickListener(new View.OnClickListener() {
@@ -113,8 +111,8 @@ public class LogInActivity extends AppCompatActivity {
             Log.e("LogInActivity",exception.toString());
         }
     }
-    private void onLogInFailure(String result) {
-        Toast.makeText(this,"Volley error during logIn:"+ result.toString(),Toast.LENGTH_LONG).show();
+    private void onLogInFailure(String error) {
+        Toast.makeText(this,"Volley error during logIn:"+ error.toString(),Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -129,7 +127,7 @@ public class LogInActivity extends AppCompatActivity {
             return;
         }
         //TODO:Make request to server and if log in is ok set user variable as global variable and set shared preference
-        userHandler.logIn(inputEmail.getText().toString(),inputPassword.getText().toString(),REQUSET_TAG,new OnLogInListener(LogInActivity.this));
+        UserHandler.logIn(this,inputEmail.getText().toString(),inputPassword.getText().toString(),REQUSET_TAG,new OnLogInListener(LogInActivity.this));
     }
     private boolean validateEmail() {
         String email = inputEmail.getText().toString().trim();

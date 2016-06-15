@@ -7,22 +7,31 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.project.mosis.buymeadrink.Application.MyAplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
+import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.ref.WeakReference;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private Button signUp;
     private EditText inputName,inputEmail,inputPassword;
     private TextInputLayout inputLayoutName,inputLayoutEmail,inputLayoutPassword;
+    final String REQUSET_TAG = "RegisterActivity";
     private UserHandler userHandler;
     @Override
 
@@ -53,7 +62,58 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    //TODO:Make public static class and implement VolleyCallBack interface
+    //TODO:Make private static inner class and implement VolleyCallBack interface
+    /**
+     * Static inner classes do not hold an implicit reference to their outher clases, so activity will not be leaked.
+     * Also because i need to access to an activity method i need to hold a reference to it. But i keep weakReference,
+     * so GC will not be prevented from deleting it. Because of that i need to check whether activity still exist.
+     * */
+    private static class OnRegisterListener implements VolleyCallBack {
+        private final WeakReference<RegisterActivity> mActivity;
+        OnRegisterListener(RegisterActivity registerActivity){
+            mActivity = new WeakReference<>(registerActivity);
+        }
+        @Override
+        public void onSuccess(JSONObject result) {
+            RegisterActivity registerActivity = mActivity.get();
+            if(registerActivity!=null)//If activity still exist then do some job, if not just return;
+                registerActivity.onRegister(result);
+        }
+
+        @Override
+        public void onFailed(String error) {
+            RegisterActivity registerActivity = mActivity.get();
+            if(registerActivity!=null)//If activity still exist then do some job, if not just return;
+                registerActivity.onRegisterFailure(error);
+        }
+    }
+    private void onRegister(JSONObject result){
+        try{
+            if(result.getBoolean("Success"))
+            {
+                User user = new Gson().fromJson(result.getString("Data"),User.class);
+
+                //set just loged user as gloabal variable (this var live togeder with app)
+                ((MyAplication) RegisterActivity.this.getApplication()).setUser(user);
+
+                //store user in local storage with sharedPreference
+                SaveSharedPreference.SetUser(RegisterActivity.this,user);
+
+                //start mainActivity and clear back stack
+                startActivity(new Intent(RegisterActivity.this,MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                Toast.makeText(this, "Thank You!", Toast.LENGTH_SHORT).show();
+                finish();
+
+            }else{
+                Toast.makeText(this,result.getString("Error"),Toast.LENGTH_LONG).show();
+            }
+        }catch (JSONException exception){
+            Log.e("LogInActivity",exception.toString());
+        }
+    }
+    private void onRegisterFailure(String error){
+        Toast.makeText(this,"Volley error during register:"+ error.toString(),Toast.LENGTH_LONG).show();
+    }
     //TODO:See logIn Activity Note:When data arive from server use Gson libraty to make user object from json
     /**
      * Validating form
@@ -71,8 +131,10 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
         //TODO:make request to server if everything ok then set shared preference and set global var just like in logIn activity
-
-        Toast.makeText(getApplicationContext(), "Thank You!", Toast.LENGTH_SHORT).show();
+        UserHandler.register(this,collectUserInfo(),REQUSET_TAG,new OnRegisterListener(this));
+    }
+    private User collectUserInfo(){
+        return new User(inputName.getText().toString(),inputEmail.getText().toString(),inputPassword.getText().toString());
     }
 
     private boolean validateName() {
