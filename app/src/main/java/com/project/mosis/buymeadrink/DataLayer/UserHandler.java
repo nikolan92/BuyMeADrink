@@ -2,16 +2,20 @@ package com.project.mosis.buymeadrink.DataLayer;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
+import com.project.mosis.buymeadrink.R;
 import com.project.mosis.buymeadrink.Utils.Constants;
 import com.project.mosis.buymeadrink.Utils.VolleyHelperSingleton;
 
@@ -66,10 +70,6 @@ public class UserHandler {
         jsonObjectRequest.setTag(tag);
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
-    public void logOut(String Tag){
-        //Ovo nam nece ni treba sobzirom da status da li je korisnik ulogovan ili ne pamtimo u shared preferencis
-        //TODO: Add code for log out (Requset to server with Volley)
-    }
     public static void register(Context context, User user, String tag, final VolleyCallBack  volleyCallBack){
 
         VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
@@ -121,11 +121,18 @@ public class UserHandler {
         jsonObjectRequest.setTag(tag);
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
-    public boolean reiseRank(String Tag){
+    public boolean reiseRank(String tag){
         //TODO: Add code for RaiseRank (Requset to server with Volley)
         return true;
     }
-    public boolean getFriends(String Tag){
+    public void getUserImage(NetworkImageView imageView, String tag){
+        ImageLoader mImageLoader =  mVolleyHelper.getImageLoader();
+        mImageLoader.get(Constants.USER_IMAGE_URL + "default-user.png",
+                ImageLoader.getImageListener(imageView, R.mipmap.ic_default_user_image,R.mipmap.ic_user_image_err));
+
+        imageView.setImageUrl(Constants.USER_IMAGE_URL + "default-user.png",mImageLoader);
+    }
+    public boolean getFriends(String tag){
         //TODO: Add code for getFriends (Requset to server with Volley)
         return true;
     }
@@ -145,5 +152,9 @@ public class UserHandler {
     public void CancelAllRequestWithTag(String tag){
         mVolleyHelper.cancelPendingRequests(tag);
         //TODO: When activity call onStop() this function must be caled because if you not call this fun Volley will call your handler and app will crash
+    }
+    public static void CancelAllRequestWithTagStatic(Context context,String tag){
+        VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
+        mVolleyHelper.cancelPendingRequests(tag);
     }
 }

@@ -10,10 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity
     private FloatingSearchView mSearchView;
     private DrawerLayout drawer;
     private GoogleMap mMap;
-    UserHandler userHandler;
+    private UserHandler userHandler;
+    final String REQUSET_TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +121,10 @@ public class MainActivity extends AppCompatActivity
         View hView = navigationView.getHeaderView(0);
         final TextView name = (TextView) hView.findViewById(R.id.nav_user_name);
         final TextView email = (TextView) hView.findViewById(R.id.nav_user_email);
+
+        final NetworkImageView user_image = (NetworkImageView) hView.findViewById(R.id.nav_user_image);
+
+        userHandler.getUserImage(user_image,REQUSET_TAG);
 
         assert name != null;
         name.setText(userHandler.GetUser().getName());
