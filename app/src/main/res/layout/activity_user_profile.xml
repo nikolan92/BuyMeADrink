@@ -28,7 +28,7 @@
         <ImageView
             android:layout_width="99dp"
             android:layout_height="99dp"
-            android:id="@+id/imageView"
+            android:id="@+id/user_profile_imageView"
             android:src="@mipmap/ic_default_user_image"
             android:contentDescription="@string/user_profile_image"
             android:layout_gravity="center_horizontal" />
