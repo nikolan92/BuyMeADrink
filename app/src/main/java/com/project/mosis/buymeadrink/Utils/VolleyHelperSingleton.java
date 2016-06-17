@@ -48,6 +48,7 @@ public class VolleyHelperSingleton {
             // getApplicationContext() is key, it keeps you from leaking the
             // Activity or BroadcastReceiver if someone passes one in.
             mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());
+            mCtx=null;//Remove context reference
         }
         return mRequestQueue;
     }

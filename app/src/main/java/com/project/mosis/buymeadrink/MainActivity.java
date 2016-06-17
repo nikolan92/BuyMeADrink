@@ -2,6 +2,8 @@ package com.project.mosis.buymeadrink;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.design.widget.NavigationView;
 
 import android.support.v4.view.GravityCompat;
@@ -10,7 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,7 +24,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -31,6 +33,8 @@ import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 import com.project.mosis.buymeadrink.SearchResultData.SearchResult;
+import com.project.mosis.buymeadrink.Service.LocationService;
+import com.project.mosis.buymeadrink.Utils.LatLngInterpolator;
 
 import org.json.JSONObject;
 
@@ -52,8 +56,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         mSearchView = (FloatingSearchView)findViewById(R.id.floating_search_view);
@@ -64,23 +70,60 @@ public class MainActivity extends AppCompatActivity
 
         setupFloatingSearch();
         setupDrawer();
-
     }
+
+    @Override
+    protected void onStop() {
+        userHandler.CancelAllRequestWithTag(REQUSET_TAG);
+        super.onStop();
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-
         // Add a marker in Sydney, Australia, and move the camera.
-        LatLng sydney = new LatLng(-34, 151);
+        LatLng sydney = new LatLng(44.0, 23);
         MarkerOptions markerOptions = new MarkerOptions().position(sydney).title("Marker in Sydney");
         Marker m = mMap.addMarker(markerOptions);
 
-        m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));//moze kasnije dodavanje ikone
+        //m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_user_image));//moze kasnije dodavanje ikone
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(44.5,23.5),9));
         //markerOptions.
+        animateMarker(m,new LatLng(44.5,23.5),new LatLngInterpolator.Linear());
 
+
+    }
+    private void animateMarker(final Marker marker, final LatLng newLocation,final LatLngInterpolator latLngInterpolator){
+
+        final LatLng startPosition = marker.getPosition();
+        final long start = SystemClock.uptimeMillis();
+        final long duration = 400;
+
+        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+        final float durationInMs = 1500;
+
+        final Handler handler = new Handler();
+        handler.post(new Runnable() {
+            long elapsed;
+            float t;
+            float v;
+            @Override
+            public void run() {
+                elapsed = SystemClock.uptimeMillis() - start;
+                t = elapsed / durationInMs;
+                v = interpolator.getInterpolation(t);
+
+                marker.setPosition(latLngInterpolator.interpolate(v, startPosition, newLocation));
+
+                // Repeat till progress is complete.
+                if (t < 1) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
     }
 
     private void setupFloatingSearch(){
@@ -145,10 +188,6 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-//            if(isSearchMenuOpen) {
-//                persistentSearch.closeMenu(true);
-//                isSearchMenuOpen = false;
-//            }
         } else if(!mSearchView.setSearchFocused(false)){
                 super.onBackPressed();
             }
@@ -172,6 +211,10 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_setings) {
 
+            //Starting service testing
+            startService(new Intent(this, LocationService.class));
+
+
             /**
              * Now here all we need to do is to make variable to our static class and make new one, then pass to the userHanler
             * */
@@ -184,6 +227,7 @@ public class MainActivity extends AppCompatActivity
             SaveSharedPreference.clearUser(this.getApplicationContext());
             //start Log in activity and clear back stack
             startActivity(new Intent(MainActivity.this,LogInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            stopService(new Intent(this, LocationService.class));
             finish();
         }
 
@@ -197,6 +241,9 @@ public class MainActivity extends AppCompatActivity
         //Toast.makeText(this,"MainActivity Destroyed.",Toast.LENGTH_SHORT).show();
         super.onDestroy();
     }
+
+
+
 
     /**
     *This function will do some job after logIn was successful.
@@ -235,6 +282,4 @@ public class MainActivity extends AppCompatActivity
                 mainActivity.onLogInFailure(error);
         }
     }
-
-
 }

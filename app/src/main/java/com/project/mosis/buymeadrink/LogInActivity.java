@@ -70,7 +70,7 @@ public class LogInActivity extends AppCompatActivity {
     private static class OnLogInListener implements VolleyCallBack {
         private final WeakReference<LogInActivity> mActivity;
         OnLogInListener(LogInActivity logInActivity){
-            mActivity = new WeakReference<LogInActivity>(logInActivity);
+            mActivity = new WeakReference<>(logInActivity);
         }
         @Override
         public void onSuccess(JSONObject result) {

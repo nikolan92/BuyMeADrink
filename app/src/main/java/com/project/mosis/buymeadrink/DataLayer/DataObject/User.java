@@ -10,7 +10,7 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private List<String> friends;
+    private List<String> friends = null;
 
     public User(String id, String name, String email, String password,ArrayList<String> friends) {
         this._id = id;
@@ -43,12 +43,10 @@ public class User {
     public String getEmail(){
         return this.email;
     }
-    public String getImgUrl(){
-        return this._id;
-    }
     public String getPassword(){
         return this.password;
     }
+    public ArrayList<String> getFriends(){return (ArrayList<String>) this.friends;}
     public void setId(String id){
         this._id = id;
     }

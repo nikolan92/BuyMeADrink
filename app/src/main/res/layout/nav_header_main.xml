@@ -14,10 +14,12 @@
 
     <com.android.volley.toolbox.NetworkImageView
         android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:layout_height="60dp"
         android:id="@+id/nav_user_image"
-        android:layout_weight="0.73"/>
+        android:elevation="5dp"
+        android:background="#000"
+        />
+    <!--android:paddingTop="@dimen/nav_header_vertical_spacing"-->
 
     <TextView
         android:layout_width="wrap_content"
