@@ -67,11 +67,11 @@ public class BluetoothActivity extends AppCompatActivity {
         ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
         assert toggle != null;
 
-        if(bluetoothAdapter == null) {
-            //device does not support BT
-            Toast.makeText(getApplicationContext(), "Oops! Your device does not support Bluetooth", Toast.LENGTH_SHORT).show();
-            toggle.setChecked(false);
-        } else {
+//        if(bluetoothAdapter == null) {
+//            //device does not support BT
+//            Toast.makeText(getApplicationContext(), "Oops! Your device does not support Bluetooth", Toast.LENGTH_SHORT).show();
+//            toggle.setChecked(false);
+//        } else {
             toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
@@ -97,7 +97,7 @@ public class BluetoothActivity extends AppCompatActivity {
                     }
                 }
             });
-        }
+//        }
 
         listView = (ListView) findViewById(R.id.listView);
 
