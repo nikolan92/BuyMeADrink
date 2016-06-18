@@ -1,6 +1,7 @@
 package com.project.mosis.buymeadrink;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,6 +45,8 @@ public class LogInActivity extends AppCompatActivity {
         inputLayoutEmail = (TextInputLayout) findViewById(R.id.login_input_layout_email);
         inputLayoutPassword = (TextInputLayout) findViewById(R.id.login_input_layout_password);
 
+        inputEmail.addTextChangedListener(new MyTextWatcher(inputEmail));
+        inputPassword.addTextChangedListener(new MyTextWatcher(inputPassword));
 
         assert signUp != null;
         signUp.setOnClickListener(new View.OnClickListener() {
@@ -133,6 +136,9 @@ public class LogInActivity extends AppCompatActivity {
         String email = inputEmail.getText().toString().trim();
 
         if (email.isEmpty() || !isValidEmail(email)) {
+//            String status = inputLayoutEmail.isErrorEnabled()?"true":"false";
+//            Toast.makeText(this,status+" "+inputLayoutEmail.getError(),Toast.LENGTH_LONG).show();
+//            inputLayoutEmail.setErrorEnabled(true);
             inputLayoutEmail.setError(getString(R.string.err_msg_email));
             requestFocus(inputEmail);
             return false;
@@ -146,6 +152,7 @@ public class LogInActivity extends AppCompatActivity {
     }
     private boolean validatePassword() {
         if (inputPassword.getText().toString().trim().isEmpty()) {
+//            inputLayoutPassword.setErrorEnabled(true);
             inputLayoutPassword.setError(getString(R.string.err_msg_password));
             requestFocus(inputPassword);
             return false;
@@ -175,10 +182,10 @@ public class LogInActivity extends AppCompatActivity {
 
         public void afterTextChanged(Editable editable) {
             switch (view.getId()) {
-                case R.id.register_input_email:
+                case R.id.login_input_email:
                     validateEmail();
                     break;
-                case R.id.register_input_password:
+                case R.id.login_input_password:
                     validatePassword();
                     break;
             }
