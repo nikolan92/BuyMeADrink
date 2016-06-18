@@ -207,6 +207,8 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_add_friend) {
 
+            startActivity(new Intent(this, BluetoothActivity.class));
+
         } else if (id == R.id.nav_my_friends) {
 
         } else if (id == R.id.nav_setings) {
