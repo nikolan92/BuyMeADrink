@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.project.mosis.buymeadrink"
-        minSdkVersion 14
+        minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -35,4 +35,6 @@ dependencies {
 //    compile 'com.android.support:support-v4:23.4.0'
     //GSON dependensy need for serialize user object
     compile 'com.google.code.gson:gson:2.5'
+    //Image crop
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.2.+'
 }
