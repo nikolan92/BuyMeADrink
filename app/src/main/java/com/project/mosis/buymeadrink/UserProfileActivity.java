@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,9 +15,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.project.mosis.buymeadrink.Application.MyAplication;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
@@ -27,7 +26,7 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 
 
 public class UserProfileActivity extends AppCompatActivity {
-    private ImageView imageView;
+    private NetworkImageView userImage;
     Uri imageUri;
 
     private EditText inputName,inputEmail,inputNewPassword,inputOldPassword;
@@ -43,22 +42,14 @@ public class UserProfileActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.user_profile_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         User user = ((MyAplication) this.getApplication()).getUser();
         userHandler = new UserHandler(this,user);
 
-        toolbar.setTitle(user.getName());
-        setupInput(user);
-        imageView = (ImageView) findViewById(R.id.user_profile_imageView);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startImagePicker();
-            }
-        });
+        setupInput();
+        loadUserInfo(user);
     }
-    private void setupInput(User user){
+    private void setupInput(){
         inputLayoutName = (TextInputLayout) findViewById(R.id.user_profile_input_layout_name);
         inputLayoutOldPassword = (TextInputLayout) findViewById(R.id.user_profile_input_layout_old_password);
         inputLayoutNewPassword = (TextInputLayout) findViewById(R.id.user_profile_input_layout_new_password);
@@ -67,9 +58,19 @@ public class UserProfileActivity extends AppCompatActivity {
         inputOldPassword = (EditText) findViewById(R.id.user_profile_input_old_password);
         inputNewPassword = (EditText) findViewById(R.id.user_profile_input_new_password);
 
+        userImage = (NetworkImageView) findViewById(R.id.user_profile_imageView);
+        userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startImagePicker();
+            }
+        });
+    }
+    private void loadUserInfo(User user){
+        //load image
+        userHandler.getUserImage(userImage,REQUSET_TAG);
         inputName.setText(user.getName());
         inputEmail.setText(user.getEmail());
-
     }
     @TargetApi(Build.VERSION_CODES.M)
     private void startImagePicker(){
@@ -107,7 +108,7 @@ public class UserProfileActivity extends AppCompatActivity {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
                 imageUri = result.getUri();
-                imageView.setImageURI(imageUri);
+                userImage.setImageURI(imageUri);
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
                 Log.e("UserProfileActivity",error.toString());
@@ -124,7 +125,7 @@ public class UserProfileActivity extends AppCompatActivity {
             }
         }
         if (requestCode == CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE) {
-            if (imageView != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (userImage != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //if we get permission for read external storage then start crop image after that we show image
                 CropImage.activity(imageUri)
                         .setGuidelines(CropImageView.Guidelines.ON)
@@ -134,5 +135,11 @@ public class UserProfileActivity extends AppCompatActivity {
                 Toast.makeText(this, "Cancelling, required permissions are not granted", Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        userHandler.CancelAllRequestWithTag(REQUSET_TAG);
     }
 }

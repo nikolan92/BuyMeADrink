@@ -52,7 +52,7 @@
 
         <activity
             android:name=".BluetoothActivity"
-            android:theme="@style/FullScreenTheme" />
+            android:theme="@style/AppTheme" />
 
         <!-- Mape -->
         <meta-data
