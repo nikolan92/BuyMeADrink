@@ -9,12 +9,19 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.project.mosis.buymeadrink.Application.MyAplication;
+import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
+import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -23,23 +30,47 @@ public class UserProfileActivity extends AppCompatActivity {
     private ImageView imageView;
     Uri imageUri;
 
+    private EditText inputName,inputEmail,inputNewPassword,inputOldPassword;
+    private TextInputLayout inputLayoutName,inputLayoutNewPassword,inputLayoutOldPassword;
+
+    final String REQUSET_TAG = "UserProfileActivity";
+    private UserHandler userHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.user_profile_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        User user = ((MyAplication) this.getApplication()).getUser();
+        userHandler = new UserHandler(this,user);
 
+        toolbar.setTitle(user.getName());
+        setupInput(user);
         imageView = (ImageView) findViewById(R.id.user_profile_imageView);
-
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startImagePicker();
             }
         });
+    }
+    private void setupInput(User user){
+        inputLayoutName = (TextInputLayout) findViewById(R.id.user_profile_input_layout_name);
+        inputLayoutOldPassword = (TextInputLayout) findViewById(R.id.user_profile_input_layout_old_password);
+        inputLayoutNewPassword = (TextInputLayout) findViewById(R.id.user_profile_input_layout_new_password);
+        inputName = (EditText) findViewById(R.id.user_profile_input_name);
+        inputEmail = (EditText) findViewById(R.id.user_profile_input_email);
+        inputOldPassword = (EditText) findViewById(R.id.user_profile_input_old_password);
+        inputNewPassword = (EditText) findViewById(R.id.user_profile_input_new_password);
+
+        inputName.setText(user.getName());
+        inputEmail.setText(user.getEmail());
 
     }
-
     @TargetApi(Build.VERSION_CODES.M)
     private void startImagePicker(){
         if (CropImage.isExplicitCameraPermissionRequired(this)) {
@@ -48,7 +79,6 @@ public class UserProfileActivity extends AppCompatActivity {
             CropImage.startPickImageActivity(this);
         }
     }
-
     @Override
     @SuppressLint("NewApi")
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

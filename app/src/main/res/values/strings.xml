@@ -4,37 +4,24 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="login_text">Login</string>
-    <string name="login_email">E-mail: </string>
-    <string name="login_password">Password: </string>
-    <string name="login_loginBtn">Login</string>
-    <string name="login_signupBtn">Signup</string>
-    <string name="login_signupText">If you don\'t have account please: </string>
-    <string name="register_text">Register</string>
-    <string name="register_repeatPassword">Repeat password: </string>
-    <string name="register_registerBtn">Register</string>
-    <string name="register_username">Username: </string>
-    <string name="user_profile_text">User profile</string>
-    <string name="user_profile_age">Age: </string>
-    <string name="user_profile_firstName">First Name: </string>
-    <string name="user_profile_lastName">Last Name: </string>
-    <string name="user_profile_saveBtn">Save</string>
-    <string name="user_profile_cancelBtn">Cancel</string>
-    <string name="user_profile_image">user_image</string>
-    <string name="action_settings">Settings</string>
-
-
 
     <string name="hint_name">Full Name</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
-    <string name="btn_register">Sign Up</string>
+    <string name="hint_old_password">Old password</string>
+    <string name="hint_new_password">New password</string>
+    <string name="btn_register">Register</string>
     <string name="btn_sign_up">Sign Up</string>
     <string name="btn_sign_in">Sign In</string>
+    <string name="btn_log_in">Log in</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
     <string name="err_msg_name">Enter your full name</string>
     <string name="err_msg_email">Enter valid email address</string>
     <string name="err_msg_password">Enter the password</string>
 
     <string name="act_name_register">Register</string>
     <string name="act_name_log_in">Log in</string>
+
+    <string name="action_settings">Setings</string>
 </resources>

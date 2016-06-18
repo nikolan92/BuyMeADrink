@@ -49,7 +49,7 @@
     <Button android:id="@+id/login_btn_log_in"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_sign_in"
+            android:text="@string/btn_log_in"
             android:layout_marginTop="40dp"/>
 
     <TextView
@@ -63,7 +63,7 @@
     <Button android:id="@+id/login_btn_sign_up"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/register_registerBtn"
+            android:text="@string/btn_register"
             android:layout_marginTop="5dp"/>
 </LinearLayout>
 
