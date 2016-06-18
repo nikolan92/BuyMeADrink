@@ -213,8 +213,6 @@ public class MainActivity extends AppCompatActivity
 
             //Starting service testing
             startService(new Intent(this, LocationService.class));
-
-
             /**
              * Now here all we need to do is to make variable to our static class and make new one, then pass to the userHanler
             * */

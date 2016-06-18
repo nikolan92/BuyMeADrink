@@ -32,13 +32,13 @@
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".LogInActivity"
-            android:theme="@style/FullScreenTheme"/>
+            android:label="LogIn"/>
         <activity
             android:name=".RegisterActivity"
-            android:theme="@style/FullScreenTheme"/>
+            android:label="Register"/>
         <activity
             android:name=".UserProfileActivity"
-            android:theme="@style/AppTheme"
+            android:label="My Profile"
             android:screenOrientation="portrait"/>
 
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>

@@ -37,4 +37,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.5'
     //Image crop
     compile 'com.theartofdev.edmodo:android-image-cropper:2.2.+'
+
 }

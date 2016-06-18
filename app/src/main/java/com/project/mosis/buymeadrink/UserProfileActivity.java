@@ -1,37 +1,33 @@
 package com.project.mosis.buymeadrink;
 
-import android.*;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.MediaStore;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageOptions;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
-import java.io.IOException;
 
 public class UserProfileActivity extends AppCompatActivity {
     private ImageView imageView;
     Uri imageUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
+
 
         imageView = (ImageView) findViewById(R.id.user_profile_imageView);
 
@@ -41,6 +37,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 startImagePicker();
             }
         });
+
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -75,7 +72,6 @@ public class UserProfileActivity extends AppCompatActivity {
                     .start(this);
             }
         }
-
 
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
