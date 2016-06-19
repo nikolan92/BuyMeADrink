@@ -62,7 +62,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    //TODO:Make private static inner class and implement VolleyCallBack interface
     /**
      * Static inner classes do not hold an implicit reference to their outher clases, so activity will not be leaked.
      * Also because i need to access to an activity method i need to hold a reference to it. But i keep weakReference,
@@ -93,6 +92,9 @@ public class RegisterActivity extends AppCompatActivity {
             {
                 User user = new Gson().fromJson(result.getString("Data"),User.class);
 
+                String name = user.getName().split(" ")[0];
+                name = (name.equals(""))?user.getName():name;//case when user don't enter fullName
+
                 //set just loged user as gloabal variable (this var live togeder with app)
                 ((MyAplication) RegisterActivity.this.getApplication()).setUser(user);
 
@@ -101,7 +103,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 //start mainActivity and clear back stack
                 startActivity(new Intent(RegisterActivity.this,MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                Toast.makeText(this, "Thank You!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Wlelcome to our aplication "+ name, Toast.LENGTH_SHORT).show();
                 finish();
 
             }else{
@@ -210,6 +212,4 @@ public class RegisterActivity extends AppCompatActivity {
             }
         }
     }
-
-
 }

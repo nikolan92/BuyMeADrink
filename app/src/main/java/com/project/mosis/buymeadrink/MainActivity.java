@@ -45,11 +45,19 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
+    private final int USER_PROFILE_ACTIVITY_REQUEST_CODE = 0;
+    private final int ADD_QUESTION_ACTIVITY_REQUEST_CODE = 1;
+
     private FloatingSearchView mSearchView;
     private DrawerLayout drawer;
     private GoogleMap mMap;
     private UserHandler userHandler;
+    private User user;
     final String REQUSET_TAG = "MainActivity";
+
+    private TextView nameInput;
+    private TextView emailInput;
+    private NetworkImageView userImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +73,12 @@ public class MainActivity extends AppCompatActivity
         mSearchView = (FloatingSearchView)findViewById(R.id.floating_search_view);
 
         //TODO:Get user from global var and make userHandler with that user
-        User user = ((MyAplication) MainActivity.this.getApplication()).getUser();
-        userHandler = new UserHandler(this,user);
+        user = ((MyAplication) MainActivity.this.getApplication()).getUser();
+        userHandler = new UserHandler(this);
 
         setupFloatingSearch();
-        setupDrawer();
+        setupDrawer();//Drawer will setup NavigationView header for userInfo
+        loadUser();
     }
 
     @Override
@@ -99,7 +108,6 @@ public class MainActivity extends AppCompatActivity
 
         final LatLng startPosition = marker.getPosition();
         final long start = SystemClock.uptimeMillis();
-        final long duration = 400;
 
         final Interpolator interpolator = new AccelerateDecelerateInterpolator();
         final float durationInMs = 1500;
@@ -162,17 +170,11 @@ public class MainActivity extends AppCompatActivity
         assert navigationView != null;
         navigationView.setNavigationItemSelectedListener(this);
         View hView = navigationView.getHeaderView(0);
-        final TextView name = (TextView) hView.findViewById(R.id.nav_user_name);
-        final TextView email = (TextView) hView.findViewById(R.id.nav_user_email);
 
-        final NetworkImageView user_image = (NetworkImageView) hView.findViewById(R.id.nav_user_image);
+        this.nameInput = (TextView) hView.findViewById(R.id.nav_user_name);
+        this.emailInput = (TextView) hView.findViewById(R.id.nav_user_email);
 
-        userHandler.getUserImage(user_image,REQUSET_TAG);
-
-        assert name != null;
-        name.setText(userHandler.GetUser().getName());
-        assert email != null;
-        email.setText(userHandler.GetUser().getEmail());
+        this.userImage = (NetworkImageView) hView.findViewById(R.id.nav_user_image);
 
         assert drawer != null;
         drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
@@ -182,7 +184,13 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-
+    private void loadUser(){
+        userHandler.getUserImage(user.getId(),userImage,REQUSET_TAG);
+        assert nameInput != null;
+        nameInput.setText(user.getName());
+        assert emailInput != null;
+        emailInput.setText(user.getEmail());
+    }
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -202,9 +210,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_add_question) {
 
         } else if (id == R.id.nav_my_profile) {
-            Intent i = new Intent(this, UserProfileActivity.class);
-            startActivity(new Intent(this,UserProfileActivity.class));
-
+            startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_add_friend) {
 
             startActivity(new Intent(this, BluetoothActivity.class));
@@ -237,14 +243,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onDestroy() {
-        //Toast.makeText(this,"MainActivity Destroyed.",Toast.LENGTH_SHORT).show();
-        super.onDestroy();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == USER_PROFILE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
+            user = ((MyAplication)getApplication()).getUser();
+            loadUser();
+//            Toast.makeText(this,"TEST",Toast.LENGTH_LONG).show();
+        }
     }
 
 
-
-
+    /**
+    *EXAMPLE:
+    *=================================================================================================
+    * */
     /**
     *This function will do some job after logIn was successful.
     * */

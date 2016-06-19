@@ -24,4 +24,5 @@
     <string name="act_name_log_in">Log in</string>
 
     <string name="action_settings">Setings</string>
+    <string name="err_msg_old_password">Your old password is not correct!</string>
 </resources>
