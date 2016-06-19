@@ -100,7 +100,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
     private void loadUserInfo(User user){
         //load image
-        userHandler.getUserImage(user.getId(),userImage,REQUSET_TAG);
+        userHandler.getUserImage(user.getId(),userImage);
         inputName.setText(user.getName());
         inputEmail.setText(user.getEmail());
     }

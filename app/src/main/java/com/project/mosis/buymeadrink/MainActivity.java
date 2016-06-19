@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
     private void loadUser(){
-        userHandler.getUserImage(user.getId(),userImage,REQUSET_TAG);
+        userHandler.getUserImage(user.getId(),userImage);
         assert nameInput != null;
         nameInput.setText(user.getName());
         assert emailInput != null;
@@ -275,9 +275,10 @@ public class MainActivity extends AppCompatActivity
      * Also because i need to access to an activity method i need to hold a reference to it. But i keep weakReference,
      * so GC will not be prevented from deleting it. Because of that i need to check whether activity still exist.
      * */
-    private static class OnLogInListener implements VolleyCallBack{
+    private static class GetAllUsersListener implements VolleyCallBack{
+        //TODO:Change MainActivity to activity
         private final WeakReference<MainActivity> mActivity;
-        OnLogInListener(MainActivity mainActivity){
+        GetAllUsersListener(MainActivity mainActivity){
             mActivity = new WeakReference<MainActivity>(mainActivity);
         }
         @Override

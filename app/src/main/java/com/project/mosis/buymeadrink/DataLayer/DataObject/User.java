@@ -77,7 +77,8 @@ public class User {
         this.rating = rating;
     }
     public void reiseRating(){
-        this.rating =+ 0.5;
+        if(this.rating<100000)
+            this.rating =+ 0.5;
     }
     public void decreaseRating(){
         if(this.rating!=0)
