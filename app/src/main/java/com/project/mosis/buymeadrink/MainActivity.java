@@ -235,6 +235,8 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(MainActivity.this,LogInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
             stopService(new Intent(this, LocationService.class));
             finish();
+        } else if(id == R.id.nav_rank_list){
+            startActivity(new Intent(this,UsersRankActivity.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -18,6 +18,10 @@
             android:id="@+id/nav_my_friends"
             android:icon="@drawable/ic_menu_manage"
             android:title="My Friends" />
+        <item
+            android:id="@+id/nav_rank_list"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Rank List" />
     </group>
 
     <item android:title="Options">

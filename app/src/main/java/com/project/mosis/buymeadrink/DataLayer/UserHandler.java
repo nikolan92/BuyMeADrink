@@ -154,6 +154,8 @@ public class UserHandler {
                     volleyCallBack.onFailed(error.toString());
             }
         });
+        jsonObjectRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
     public void showMyFriends(){
 
