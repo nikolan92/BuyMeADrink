@@ -14,6 +14,7 @@ public class VolleyHelperSingleton {
     private static VolleyHelperSingleton mInstance;
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
+
     private static Context mCtx;
 
     private VolleyHelperSingleton(Context context) {
@@ -24,7 +25,6 @@ public class VolleyHelperSingleton {
 
             private final LruCache<String, Bitmap>
                     cache = new LruCache<String, Bitmap>(20);//number of entries 20 a ako overridujem sizeOf onda bi bila max velicina u bytima
-
             @Override
             public Bitmap getBitmap(String url) {
                 return cache.get(url);
@@ -34,6 +34,7 @@ public class VolleyHelperSingleton {
             public void putBitmap(String url, Bitmap bitmap) {
                 cache.put(url, bitmap);
             }
+
         });
     }
     public static synchronized VolleyHelperSingleton getInstance(Context context){
@@ -68,6 +69,29 @@ public class VolleyHelperSingleton {
             mRequestQueue.cancelAll(tag);
         }
     }
+
+//    public void removeImageFromCache(String key){
+//        mImageCache.removeImageFromCache(key);
+//    }
+//    /**
+//     * <p>MyImageCache implements ImageLoader.ImageCache and add one more function, now I can to remove specific image from cache.</p>
+//                * */
+//        public class MyImageCache implements ImageLoader.ImageCache {
+//            private final LruCache<String, Bitmap>
+//                    cache = new LruCache<String, Bitmap>(20);//number of entries 20 a ako overridujem sizeOf onda bi bila max velicina u bytima
+//            @Override
+//            public Bitmap getBitmap(String url) {
+//                return cache.get(url);
+//            }
+//
+//            @Override
+//            public void putBitmap(String url, Bitmap bitmap) {
+//                cache.put(url,bitmap);
+//            }
+//            public void removeImageFromCache(String key){
+//                cache.remove(key);
+//            }
+//    }
 }
 //exemple of use
 //    // Get a RequestQueue

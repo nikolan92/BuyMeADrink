@@ -1,8 +1,14 @@
 package com.project.mosis.buymeadrink;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.design.widget.NavigationView;
 
@@ -53,7 +59,25 @@ public class MainActivity extends AppCompatActivity
     private GoogleMap mMap;
     private UserHandler userHandler;
     private User user;
-    final String REQUSET_TAG = "MainActivity";
+    private final String REQUSET_TAG = "MainActivity";
+
+    //Service
+    private UpdateMapReceiver updateMapReceiver;
+    private LocationService locationService;
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            //locationService = ((LocationService.MyBinder)service).getService();
+            Toast.makeText(MainActivity.this,"Connected to service!",Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            locationService = null;
+            Toast.makeText(MainActivity.this,"Disconnected from service!",Toast.LENGTH_SHORT).show();
+        }
+    };
+    //End of Service
 
     private TextView nameInput;
     private TextView emailInput;
@@ -79,11 +103,26 @@ public class MainActivity extends AppCompatActivity
         setupFloatingSearch();
         setupDrawer();//Drawer will setup NavigationView header for userInfo
         loadUser();
+
+//        int process = android.os.Process.myPid();
+//        Toast.makeText(this,"Activity process id:"+process,Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onStart() {
+        updateMapReceiver = new UpdateMapReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LocationService.UPDATE_MAP);
+        registerReceiver(updateMapReceiver,intentFilter);
+
+        super.onStart();
     }
 
     @Override
     protected void onStop() {
         userHandler.CancelAllRequestWithTag(REQUSET_TAG);
+        unregisterReceiver(updateMapReceiver);
+
         super.onStop();
     }
 
@@ -208,19 +247,21 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_add_question) {
+            //bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
 
         } else if (id == R.id.nav_my_profile) {
             startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_add_friend) {
 
-            startActivity(new Intent(this, BluetoothActivity.class));
+            //startActivity(new Intent(this, BluetoothActivity.class));
 
         } else if (id == R.id.nav_my_friends) {
+            //unbindService(mConnection);
 
         } else if (id == R.id.nav_setings) {
 
             //Starting service testing
-            startService(new Intent(this, LocationService.class));
+            //startService(new Intent(this, LocationService.class));
             /**
              * Now here all we need to do is to make variable to our static class and make new one, then pass to the userHanler
             * */
@@ -250,13 +291,22 @@ public class MainActivity extends AppCompatActivity
         if(requestCode == USER_PROFILE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
             user = ((MyAplication)getApplication()).getUser();
             loadUser();
-//            Toast.makeText(this,"TEST",Toast.LENGTH_LONG).show();
         }
     }
-
-
     /**
-    *EXAMPLE:
+     *BroadCastReceiver
+     *=================================================================================================
+     * */
+    private class UpdateMapReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String dataFromService = intent.getStringExtra(LocationService.FRIENDS_LOCATIONS);
+            Toast.makeText(MainActivity.this,"Service trigger this event. Data:" + dataFromService,Toast.LENGTH_SHORT).show();
+        }
+    }
+    /**
+    *EXAMPLE:For UserHandler use
     *=================================================================================================
     * */
     /**

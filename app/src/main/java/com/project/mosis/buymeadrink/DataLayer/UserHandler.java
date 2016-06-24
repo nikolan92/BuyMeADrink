@@ -13,6 +13,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.gms.maps.model.LatLng;
@@ -128,7 +129,8 @@ public class UserHandler {
         mHandler.post(bitmapToBase64);
     }
 
-    public void getUserImage(String userID,NetworkImageView imageView){
+    public void getUserImage(String userID, final NetworkImageView imageView){
+
         ImageLoader mImageLoader =  mVolleyHelper.getImageLoader();
         mImageLoader.get(Constants.USER_IMAGE_URL + userID + ".jpg",
                 ImageLoader.getImageListener(imageView, R.mipmap.ic_default_user_image,R.mipmap.ic_default_user_image));
@@ -174,7 +176,9 @@ public class UserHandler {
         VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
         mVolleyHelper.cancelPendingRequests(tag);
     }
-
+    /**
+     *
+     * */
     private class BitmapToBase64 implements Runnable{
         User user;
         VolleyCallBack volleyCallBack;
@@ -204,7 +208,6 @@ public class UserHandler {
                 @Override
                 public void onResponse(JSONObject response) {
                     if(volleyCallBack!=null) {
-//                        mVolleyHelper.getRequestQueue().getCache().remove(Constants.USER_URL+"/"+user.getId()+".jpg");
                         volleyCallBack.onSuccess(response);
                     }
                 }
