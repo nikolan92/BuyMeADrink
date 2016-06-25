@@ -6,6 +6,7 @@ public final class Constants {
     public static final String LOG_IN_URL = HOST + "/api/login";
     public static final String USER_URL = HOST + "/api/user";
     public static final String USER_IMAGE_URL = HOST + "/images/users/";
-//    public static final String GET_FRIENDS_URL = HOST + "/api/user";
+
+    public static final String UPDATE_LOCATION = HOST + "/api/updateLocation";
 //    public static final String GET_FRIENDS_LOCATIONS_URL = HOST + "/api/user";
 }

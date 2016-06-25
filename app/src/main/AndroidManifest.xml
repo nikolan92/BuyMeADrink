@@ -77,7 +77,6 @@
 
         <service
             android:name=".Service.LocationService"
-            android:process=":LocationReport"
             android:enabled="true"
             android:exported="true">
         </service>

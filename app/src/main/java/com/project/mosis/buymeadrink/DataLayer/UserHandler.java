@@ -137,12 +137,8 @@ public class UserHandler {
 
         imageView.setImageUrl(Constants.USER_IMAGE_URL + userID +".jpg",mImageLoader);
     }
-    public boolean getFriends(String tag){
-        //TODO: Add code for getFriends (Requset to server with Volley)
-        return true;
-    }
-    public static void  getAllUsers(Context context,String tag,final VolleyCallBack  volleyCallBack){
-        VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
+
+    public void  getAllUsers(String tag,final VolleyCallBack  volleyCallBack){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.USER_URL, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -159,13 +155,7 @@ public class UserHandler {
         jsonObjectRequest.setTag(tag);
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
-    public void showMyFriends(){
-
-    }
-    public void sendMyLocation(LatLng currentLocation){
-
-    }
-    public void CancelAllRequestWithTag(String tag){
+    public void cancelAllRequestWithTag(String tag){
         mVolleyHelper.cancelPendingRequests(tag);
         if(mHandler!=null){
             //mHandler.removeCallbacks(null);
@@ -177,7 +167,7 @@ public class UserHandler {
         mVolleyHelper.cancelPendingRequests(tag);
     }
     /**
-     *
+     *<p>This thread convert bitmap in Base64 string, after that make volley request.</p>
      * */
     private class BitmapToBase64 implements Runnable{
         User user;

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 public class UsersRankActivity extends AppCompatActivity {
 
     final String REQUSET_TAG = "UsersRankActivity";
+    private UserHandler userHandler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,12 +32,13 @@ public class UsersRankActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        userHandler = new UserHandler(this);
         final Button t = (Button) findViewById(R.id.testbtn);
         assert t!=null;
         t.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UserHandler.getAllUsers(UsersRankActivity.this,REQUSET_TAG,new GetAllUsersListener(UsersRankActivity.this));
+                userHandler.getAllUsers(REQUSET_TAG,new GetAllUsersListener(UsersRankActivity.this));
             }
         });
     }
@@ -49,9 +51,6 @@ public class UsersRankActivity extends AppCompatActivity {
         for(int i=0;i<users.size();i++)
             Log.d("USERS",users.get(i).getName());
     }
-
-
-
 
     //Request to the server, and handle result...
     /**
@@ -73,8 +72,7 @@ public class UsersRankActivity extends AppCompatActivity {
         }catch (JSONException exception){
             Log.e("UserRankActivity",exception.toString());
         }
-
-        Toast.makeText(this, result.toString(),Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, result.toString(),Toast.LENGTH_SHORT).show();
         usersAreReady(users);
 
     }
@@ -113,6 +111,6 @@ public class UsersRankActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        UserHandler.CancelAllRequestWithTagStatic(this,REQUSET_TAG);
+        userHandler.cancelAllRequestWithTag(REQUSET_TAG);
     }
 }

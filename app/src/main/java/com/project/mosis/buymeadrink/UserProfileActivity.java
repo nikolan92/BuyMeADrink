@@ -174,7 +174,7 @@ public class UserProfileActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        userHandler.CancelAllRequestWithTag(REQUSET_TAG);
+        userHandler.cancelAllRequestWithTag(REQUSET_TAG);
     }
 
     private User collectUserInfo(){

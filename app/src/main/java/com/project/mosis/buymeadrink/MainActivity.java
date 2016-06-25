@@ -1,17 +1,24 @@
 package com.project.mosis.buymeadrink;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -51,6 +58,9 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
+    private final int LOCATION_PERMISSION_CODE = 0;
+    private final int SETTINGS_INTENT = 5;
+
     private final int USER_PROFILE_ACTIVITY_REQUEST_CODE = 0;
     private final int ADD_QUESTION_ACTIVITY_REQUEST_CODE = 1;
 
@@ -67,16 +77,17 @@ public class MainActivity extends AppCompatActivity
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            //locationService = ((LocationService.MyBinder)service).getService();
-            Toast.makeText(MainActivity.this,"Connected to service!",Toast.LENGTH_SHORT).show();
+            LocationService.MyBinder myBinder = (LocationService.MyBinder) service;
+            locationService = myBinder.getService();
+            //Toast.makeText(MainActivity.this,"Connected to service!",Toast.LENGTH_SHORT).show();
         }
-
         @Override
         public void onServiceDisconnected(ComponentName name) {
             locationService = null;
-            Toast.makeText(MainActivity.this,"Disconnected from service!",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this,"Disconnected from service!",Toast.LENGTH_SHORT).show();
         }
     };
+    private boolean locationPermission = false;
     //End of Service
 
     private TextView nameInput;
@@ -88,7 +99,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -96,7 +106,6 @@ public class MainActivity extends AppCompatActivity
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         mSearchView = (FloatingSearchView)findViewById(R.id.floating_search_view);
 
-        //TODO:Get user from global var and make userHandler with that user
         user = ((MyAplication) MainActivity.this.getApplication()).getUser();
         userHandler = new UserHandler(this);
 
@@ -106,24 +115,88 @@ public class MainActivity extends AppCompatActivity
 
 //        int process = android.os.Process.myPid();
 //        Toast.makeText(this,"Activity process id:"+process,Toast.LENGTH_LONG).show();
+
+        //Request permission
+        locationPermission();
+    }
+
+    private void locationPermission() {
+        if(Build.VERSION.SDK_INT<23){
+            locationPermission =true;
+            startService(new Intent(this, LocationService.class));
+        }else{
+            if(checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                locationPermission = true;
+                startService(new Intent(this, LocationService.class));
+                return;
+            }
+
+            if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) && shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)){
+                Snackbar.make(drawer,"Location access is required to show your friend and questions on map.",Snackbar.LENGTH_INDEFINITE)
+                        .setAction("OK", new View.OnClickListener() {
+                            @TargetApi(Build.VERSION_CODES.M)
+                            @Override
+                            public void onClick(View v) {
+                                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},LOCATION_PERMISSION_CODE);
+                            }
+                        })
+                        .show();
+            }else{
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},LOCATION_PERMISSION_CODE);
+            }
+
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Snackbar.make(drawer,"Location access is available, you will see your friends and question on map in few second.",Snackbar.LENGTH_LONG).show();
+
+            locationPermission =true;
+            startService(new Intent(this, LocationService.class));
+            updateMapReceiver = new UpdateMapReceiver();
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(LocationService.ACTION_UPDATE_MAP);
+            registerReceiver(updateMapReceiver,intentFilter);
+
+            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
+
+        } else {
+            Snackbar.make(drawer,"Location access is critical for this app, please allow location access!",Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Settings", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            startActivityForResult(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", getPackageName(), null)),SETTINGS_INTENT);
+                        }
+                    }).show();
+        }
     }
 
     @Override
     protected void onStart() {
-        updateMapReceiver = new UpdateMapReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(LocationService.UPDATE_MAP);
-        registerReceiver(updateMapReceiver,intentFilter);
-
         super.onStart();
+        if(locationPermission){
+            updateMapReceiver = new UpdateMapReceiver();
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(LocationService.ACTION_UPDATE_MAP);
+            registerReceiver(updateMapReceiver,intentFilter);
+
+            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
+        }
     }
 
     @Override
     protected void onStop() {
-        userHandler.CancelAllRequestWithTag(REQUSET_TAG);
-        unregisterReceiver(updateMapReceiver);
-
         super.onStop();
+
+        userHandler.cancelAllRequestWithTag(REQUSET_TAG);
+        if(locationPermission) {
+            unregisterReceiver(updateMapReceiver);
+            unbindService(mConnection);
+        }
     }
 
     @Override
@@ -247,21 +320,21 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_add_question) {
-            //bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
+            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
 
         } else if (id == R.id.nav_my_profile) {
             startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_add_friend) {
 
-            //startActivity(new Intent(this, BluetoothActivity.class));
+            startActivity(new Intent(this, BluetoothActivity.class));
 
         } else if (id == R.id.nav_my_friends) {
-            //unbindService(mConnection);
+            unbindService(mConnection);
 
         } else if (id == R.id.nav_setings) {
 
             //Starting service testing
-            //startService(new Intent(this, LocationService.class));
+            startService(new Intent(this, LocationService.class));
             /**
              * Now here all we need to do is to make variable to our static class and make new one, then pass to the userHanler
             * */
@@ -291,7 +364,11 @@ public class MainActivity extends AppCompatActivity
         if(requestCode == USER_PROFILE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
             user = ((MyAplication)getApplication()).getUser();
             loadUser();
+        }else if(requestCode == SETTINGS_INTENT)
+        {
+            locationPermission();
         }
+
     }
     /**
      *BroadCastReceiver
