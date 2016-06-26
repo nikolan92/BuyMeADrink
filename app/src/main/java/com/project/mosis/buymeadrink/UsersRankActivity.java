@@ -33,6 +33,7 @@ public class UsersRankActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         userHandler = new UserHandler(this);
+
         final Button t = (Button) findViewById(R.id.testbtn);
         assert t!=null;
         t.setOnClickListener(new View.OnClickListener() {
@@ -65,7 +66,6 @@ public class UsersRankActivity extends AppCompatActivity {
                 for(int i=0;i<usersInJSON.length();i++){
                     users.add(new Gson().fromJson(usersInJSON.getJSONObject(i).toString(),User.class));
                 }
-
             }else {
                 //{"Success":false,"Error":"No users in data base."}
             }

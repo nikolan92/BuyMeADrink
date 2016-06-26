@@ -118,6 +118,8 @@ public class MainActivity extends AppCompatActivity
 
         //Request permission
         locationPermission();
+        if(locationPermission)
+            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
     }
 
     private void locationPermission() {
@@ -183,8 +185,6 @@ public class MainActivity extends AppCompatActivity
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(LocationService.ACTION_UPDATE_MAP);
             registerReceiver(updateMapReceiver,intentFilter);
-
-            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
         }
     }
 
@@ -195,8 +195,14 @@ public class MainActivity extends AppCompatActivity
         userHandler.cancelAllRequestWithTag(REQUSET_TAG);
         if(locationPermission) {
             unregisterReceiver(updateMapReceiver);
-            unbindService(mConnection);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(locationPermission)
+            unbindService(mConnection);
     }
 
     @Override
@@ -320,7 +326,6 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_add_question) {
-            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
 
         } else if (id == R.id.nav_my_profile) {
             startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
@@ -329,12 +334,8 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(this, BluetoothActivity.class));
 
         } else if (id == R.id.nav_my_friends) {
-            unbindService(mConnection);
 
         } else if (id == R.id.nav_setings) {
-
-            //Starting service testing
-            startService(new Intent(this, LocationService.class));
             /**
              * Now here all we need to do is to make variable to our static class and make new one, then pass to the userHanler
             * */
@@ -347,7 +348,9 @@ public class MainActivity extends AppCompatActivity
             SaveSharedPreference.clearUser(this.getApplicationContext());
             //start Log in activity and clear back stack
             startActivity(new Intent(MainActivity.this,LogInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-            stopService(new Intent(this, LocationService.class));
+            if(locationPermission) {
+                stopService(new Intent(this, LocationService.class));
+            }
             finish();
         } else if(id == R.id.nav_rank_list){
             startActivity(new Intent(this,UsersRankActivity.class));
