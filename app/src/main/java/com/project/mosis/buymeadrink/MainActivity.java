@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -37,11 +40,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.project.mosis.buymeadrink.Application.MyAplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
+import com.project.mosis.buymeadrink.DataLayer.DataObject.ObjectLocation;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
@@ -53,10 +58,13 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
+
+    private final String LOG_TAG = "MainActivity";
 
     private final int LOCATION_PERMISSION_CODE = 0;
     private final int SETTINGS_INTENT = 5;
@@ -70,6 +78,10 @@ public class MainActivity extends AppCompatActivity
     private UserHandler userHandler;
     private User user;
     private final String REQUSET_TAG = "MainActivity";
+
+
+    private HashMap<String,Marker> markers;
+    private Marker currentLocation;
 
     //Service
     private UpdateMapReceiver updateMapReceiver;
@@ -99,6 +111,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        markers = new HashMap<>();
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -112,9 +126,6 @@ public class MainActivity extends AppCompatActivity
         setupFloatingSearch();
         setupDrawer();//Drawer will setup NavigationView header for userInfo
         loadUser();
-
-//        int process = android.os.Process.myPid();
-//        Toast.makeText(this,"Activity process id:"+process,Toast.LENGTH_LONG).show();
 
         //Request permission
         locationPermission();
@@ -184,6 +195,7 @@ public class MainActivity extends AppCompatActivity
             updateMapReceiver = new UpdateMapReceiver();
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(LocationService.ACTION_UPDATE_MAP);
+            intentFilter.addAction(LocationService.ACTION_UPDATE_MY_LOCATION);
             registerReceiver(updateMapReceiver,intentFilter);
         }
     }
@@ -211,15 +223,14 @@ public class MainActivity extends AppCompatActivity
         // Add a marker in Sydney, Australia, and move the camera.
         LatLng sydney = new LatLng(44.0, 23);
         MarkerOptions markerOptions = new MarkerOptions().position(sydney).title("Marker in Sydney");
-        Marker m = mMap.addMarker(markerOptions);
+        //Marker m = mMap.addMarker(markerOptions);
 
         //m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_user_image));//moze kasnije dodavanje ikone
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(44.5,23.5),9));
         //markerOptions.
-        animateMarker(m,new LatLng(44.5,23.5),new LatLngInterpolator.Linear());
-
+        //animateMarker(m,new LatLng(44.5,23.5),new LatLngInterpolator.Linear());
 
     }
     private void animateMarker(final Marker marker, final LatLng newLocation,final LatLngInterpolator latLngInterpolator){
@@ -371,7 +382,6 @@ public class MainActivity extends AppCompatActivity
         {
             locationPermission();
         }
-
     }
     /**
      *BroadCastReceiver
@@ -381,10 +391,37 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String dataFromService = intent.getStringExtra(LocationService.FRIENDS_LOCATIONS);
-            Toast.makeText(MainActivity.this,"Service trigger this event. Data:" + dataFromService,Toast.LENGTH_SHORT).show();
+            Log.i(LOG_TAG,intent.getAction());
+            if(intent.getAction().equals(LocationService.ACTION_UPDATE_MAP)) {
+                ArrayList<ObjectLocation> friends_location = intent.getParcelableArrayListExtra(LocationService.FRIENDS_LOCATIONS);
+
+                //my location is always first in array
+                updateMyLocation(friends_location.get(0));
+                for (int i = 0; i < friends_location.size(); i++)
+                    Log.i(LOG_TAG, friends_location.get(i).getObjectId());
+
+            }else if(intent.getAction().equals(LocationService.ACTION_UPDATE_MY_LOCATION)){
+                updateMyLocation((ObjectLocation) intent.getParcelableExtra(LocationService.MY_LOCATION));
+            }
         }
     }
+    private void updateMyLocation(ObjectLocation location){
+        if(currentLocation==null){
+            LatLng latLng = new LatLng(location.getLat(),location.getLng());
+            Bitmap icon = ((BitmapDrawable)userImage.getDrawable()).getBitmap();
+            Bitmap smallIcon = Bitmap.createScaledBitmap(icon,100,100,false);
+            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(smallIcon));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            currentLocation = mMap.addMarker(markerOptions);
+        }else{
+            animateMarker(currentLocation,new LatLng(location.getLat(),location.getLng()),new LatLngInterpolator.Linear());
+        }
+
+            Log.i(LOG_TAG, String.valueOf(location.getLat()));
+    }
+
+
+
     /**
     *EXAMPLE:For UserHandler use
     *=================================================================================================

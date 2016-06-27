@@ -40,6 +40,7 @@ public class LocationHelper {
                 jsonArray.put(user.getFriends().get(i));
 
             jsonObject.put("friends",jsonArray);
+        Log.d("JSONOBJECT:",jsonObject.toString());
 
         }catch (JSONException exception){
             Log.e("LocationHelper",exception.toString());
