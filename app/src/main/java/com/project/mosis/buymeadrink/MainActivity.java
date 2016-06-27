@@ -44,16 +44,20 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.JsonArray;
 import com.project.mosis.buymeadrink.Application.MyAplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.ObjectLocation;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
+import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBackBitmap;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 import com.project.mosis.buymeadrink.SearchResultData.SearchResult;
 import com.project.mosis.buymeadrink.Service.LocationService;
 import com.project.mosis.buymeadrink.Utils.LatLngInterpolator;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
@@ -64,26 +68,32 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
+    //code for Log report
     private final String LOG_TAG = "MainActivity";
-
+    //location permission codes
     private final int LOCATION_PERMISSION_CODE = 0;
-    private final int SETTINGS_INTENT = 5;
-
+    //Intent codes
     private final int USER_PROFILE_ACTIVITY_REQUEST_CODE = 0;
     private final int ADD_QUESTION_ACTIVITY_REQUEST_CODE = 1;
-
+    private final int SETTINGS_ACTIVITY_REQUEST_CODE = 2;
+    //UserHandler Volley request code
+    private final String REQUEST_TAG = "MainActivity";
+    //Layout var
     private FloatingSearchView mSearchView;
     private DrawerLayout drawer;
-    private GoogleMap mMap;
+    private TextView nameInput;
+    private TextView emailInput;
+    private NetworkImageView userImage;
+    //User
     private UserHandler userHandler;
     private User user;
-    private final String REQUSET_TAG = "MainActivity";
-
-
+    //Map
+    private GoogleMap mMap;
     private HashMap<String,Marker> markers;
+    private HashMap<String,String> friends_names;
     private Marker currentLocation;
 
-    //Service
+    //Service var
     private UpdateMapReceiver updateMapReceiver;
     private LocationService locationService;
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -102,16 +112,13 @@ public class MainActivity extends AppCompatActivity
     private boolean locationPermission = false;
     //End of Service
 
-    private TextView nameInput;
-    private TextView emailInput;
-    private NetworkImageView userImage;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         markers = new HashMap<>();
+        friends_names = new HashMap<>();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -123,6 +130,9 @@ public class MainActivity extends AppCompatActivity
         user = ((MyAplication) MainActivity.this.getApplication()).getUser();
         userHandler = new UserHandler(this);
 
+        //load friends info
+        userHandler.getUserFriends(REQUEST_TAG,user.getId(),new GetFriendsInfoListener(this));
+
         setupFloatingSearch();
         setupDrawer();//Drawer will setup NavigationView header for userInfo
         loadUser();
@@ -131,61 +141,6 @@ public class MainActivity extends AppCompatActivity
         locationPermission();
         if(locationPermission)
             bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
-    }
-
-    private void locationPermission() {
-        if(Build.VERSION.SDK_INT<23){
-            locationPermission =true;
-            startService(new Intent(this, LocationService.class));
-        }else{
-            if(checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-                locationPermission = true;
-                startService(new Intent(this, LocationService.class));
-                return;
-            }
-
-            if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) && shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)){
-                Snackbar.make(drawer,"Location access is required to show your friend and questions on map.",Snackbar.LENGTH_INDEFINITE)
-                        .setAction("OK", new View.OnClickListener() {
-                            @TargetApi(Build.VERSION_CODES.M)
-                            @Override
-                            public void onClick(View v) {
-                                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},LOCATION_PERMISSION_CODE);
-                            }
-                        })
-                        .show();
-            }else{
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},LOCATION_PERMISSION_CODE);
-            }
-
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Snackbar.make(drawer,"Location access is available, you will see your friends and question on map in few second.",Snackbar.LENGTH_LONG).show();
-
-            locationPermission =true;
-            startService(new Intent(this, LocationService.class));
-            updateMapReceiver = new UpdateMapReceiver();
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(LocationService.ACTION_UPDATE_MAP);
-            registerReceiver(updateMapReceiver,intentFilter);
-
-            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
-
-        } else {
-            Snackbar.make(drawer,"Location access is critical for this app, please allow location access!",Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Settings", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            startActivityForResult(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                    Uri.fromParts("package", getPackageName(), null)),SETTINGS_INTENT);
-                        }
-                    }).show();
-        }
     }
 
     @Override
@@ -204,7 +159,7 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
 
-        userHandler.cancelAllRequestWithTag(REQUSET_TAG);
+        userHandler.cancelAllRequestWithTag(REQUEST_TAG);
         if(locationPermission) {
             unregisterReceiver(updateMapReceiver);
         }
@@ -218,49 +173,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        // Add a marker in Sydney, Australia, and move the camera.
-        LatLng sydney = new LatLng(44.0, 23);
-        MarkerOptions markerOptions = new MarkerOptions().position(sydney).title("Marker in Sydney");
-        //Marker m = mMap.addMarker(markerOptions);
-
-        //m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_user_image));//moze kasnije dodavanje ikone
-
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(44.5,23.5),9));
-        //markerOptions.
-        //animateMarker(m,new LatLng(44.5,23.5),new LatLngInterpolator.Linear());
-
-    }
-    private void animateMarker(final Marker marker, final LatLng newLocation,final LatLngInterpolator latLngInterpolator){
-
-        final LatLng startPosition = marker.getPosition();
-        final long start = SystemClock.uptimeMillis();
-
-        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
-        final float durationInMs = 1500;
-
-        final Handler handler = new Handler();
-        handler.post(new Runnable() {
-            long elapsed;
-            float t;
-            float v;
-            @Override
-            public void run() {
-                elapsed = SystemClock.uptimeMillis() - start;
-                t = elapsed / durationInMs;
-                v = interpolator.getInterpolation(t);
-
-                marker.setPosition(latLngInterpolator.interpolate(v, startPosition, newLocation));
-
-                // Repeat till progress is complete.
-                if (t < 1) {
-                    // Post again 16ms later.
-                    handler.postDelayed(this, 16);
-                }
-            }
-        });
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else if(!mSearchView.setSearchFocused(false)){
+            super.onBackPressed();
+        }
     }
 
     private void setupFloatingSearch(){
@@ -293,7 +212,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-
     private void setupDrawer(){
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         assert navigationView != null;
@@ -319,15 +237,6 @@ public class MainActivity extends AppCompatActivity
         nameInput.setText(user.getName());
         assert emailInput != null;
         emailInput.setText(user.getEmail());
-    }
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if(!mSearchView.setSearchFocused(false)){
-                super.onBackPressed();
-            }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -378,15 +287,72 @@ public class MainActivity extends AppCompatActivity
         if(requestCode == USER_PROFILE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
             user = ((MyAplication)getApplication()).getUser();
             loadUser();
-        }else if(requestCode == SETTINGS_INTENT)
+        }else if(requestCode == SETTINGS_ACTIVITY_REQUEST_CODE)
         {
             locationPermission();
         }
     }
     /**
-     *BroadCastReceiver
+     *Permission for location, Android Marshmallow
      *=================================================================================================
      * */
+    private void locationPermission() {
+        if(Build.VERSION.SDK_INT<23){
+            locationPermission =true;
+            startService(new Intent(this, LocationService.class));
+        }else{
+            if(checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                locationPermission = true;
+                startService(new Intent(this, LocationService.class));
+                return;
+            }
+
+            if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) && shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)){
+                Snackbar.make(drawer,"Location access is required to show your friend and questions on map.",Snackbar.LENGTH_INDEFINITE)
+                        .setAction("OK", new View.OnClickListener() {
+                            @TargetApi(Build.VERSION_CODES.M)
+                            @Override
+                            public void onClick(View v) {
+                                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},LOCATION_PERMISSION_CODE);
+                            }
+                        })
+                        .show();
+            }else{
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},LOCATION_PERMISSION_CODE);
+            }
+
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Snackbar.make(drawer,"Location access is available, you will see your friends and question on map in few second.",Snackbar.LENGTH_LONG).show();
+
+            locationPermission =true;
+            startService(new Intent(this, LocationService.class));
+            updateMapReceiver = new UpdateMapReceiver();
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(LocationService.ACTION_UPDATE_MAP);
+            registerReceiver(updateMapReceiver,intentFilter);
+
+            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
+
+        } else {
+            Snackbar.make(drawer,"Location access is critical for this app, please allow location access!",Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Settings", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            startActivityForResult(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", getPackageName(), null)), SETTINGS_ACTIVITY_REQUEST_CODE);
+                        }
+                    }).show();
+        }
+    }
+    /**
+     *BroadCastReceiver inner class
+     *=================================================================================================
+     **/
     private class UpdateMapReceiver extends BroadcastReceiver{
 
         @Override
@@ -394,74 +360,195 @@ public class MainActivity extends AppCompatActivity
             Log.i(LOG_TAG,intent.getAction());
             if(intent.getAction().equals(LocationService.ACTION_UPDATE_MAP)) {
                 ArrayList<ObjectLocation> friends_location = intent.getParcelableArrayListExtra(LocationService.FRIENDS_LOCATIONS);
-
-                //my location is always first in array
-                updateMyLocation(friends_location.get(0));
-                for (int i = 0; i < friends_location.size(); i++)
-                    Log.i(LOG_TAG, friends_location.get(i).getObjectId());
+                updateFriendsLocation(friends_location);
 
             }else if(intent.getAction().equals(LocationService.ACTION_UPDATE_MY_LOCATION)){
                 updateMyLocation((ObjectLocation) intent.getParcelableExtra(LocationService.MY_LOCATION));
             }
         }
     }
+    /**
+     *Work with map and markers
+     *=================================================================================================
+     **/
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        // Add a marker in Sydney, Australia, and move the camera.
+        //LatLng sydney = new LatLng(44.0, 23);
+        //MarkerOptions markerOptions = new MarkerOptions().position(sydney).title("Marker in Sydney");
+        //Marker m = mMap.addMarker(markerOptions);
+
+        //m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_user_image));//moze kasnije dodavanje ikone
+
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(44.5,23.5),9));
+        //markerOptions.
+        //animateMarker(m,new LatLng(44.5,23.5),new LatLngInterpolator.Linear());
+
+    }
+    private void animateMarker(final Marker marker, final LatLng newLocation,final LatLngInterpolator latLngInterpolator){
+
+        final LatLng startPosition = marker.getPosition();
+        final long start = SystemClock.uptimeMillis();
+
+        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+        final float durationInMs = 1500;
+
+        final Handler handler = new Handler();
+        handler.post(new Runnable() {
+            long elapsed;
+            float t;
+            float v;
+            @Override
+            public void run() {
+                elapsed = SystemClock.uptimeMillis() - start;
+                t = elapsed / durationInMs;
+                v = interpolator.getInterpolation(t);
+
+                marker.setPosition(latLngInterpolator.interpolate(v, startPosition, newLocation));
+
+                // Repeat till progress is complete.
+                if (t < 1) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
+    }
+
     private void updateMyLocation(ObjectLocation location){
+        //if for some reason map is not available return
+        if(mMap==null)
+            return;
+
         if(currentLocation==null){
             LatLng latLng = new LatLng(location.getLat(),location.getLng());
             Bitmap icon = ((BitmapDrawable)userImage.getDrawable()).getBitmap();
-            Bitmap smallIcon = Bitmap.createScaledBitmap(icon,100,100,false);
+            Bitmap smallIcon = Bitmap.createScaledBitmap(icon,100,100,false);//
             MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(smallIcon));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
+
             currentLocation = mMap.addMarker(markerOptions);
         }else{
             animateMarker(currentLocation,new LatLng(location.getLat(),location.getLng()),new LatLngInterpolator.Linear());
         }
-
-            Log.i(LOG_TAG, String.valueOf(location.getLat()));
     }
 
+    private void updateFriendsLocation(ArrayList<ObjectLocation> friends_location){
+        //if map is not ready yet which should not ever happen then return
+        if(mMap==null)
+            return;
+        //if friends names is not ready yet which should not ever happen then return
+        if(friends_names.isEmpty())
+            return;
 
+        //this do only first time, if markers is set then just update markers location
+        if(markers.isEmpty()) {
+            for (int i = 0; i < friends_location.size(); i++) {
+                LatLng latLng = new LatLng(friends_location.get(i).getLat(), friends_location.get(i).getLng());
+                String friendID = friends_location.get(i).getObjectId();
 
-    /**
-    *EXAMPLE:For UserHandler use
-    *=================================================================================================
-    * */
-    /**
-    *This function will do some job after logIn was successful.
-    * */
-    public void onLogIn(JSONObject result){
-        Toast.makeText(MainActivity.this, result.toString(),Toast.LENGTH_SHORT).show();
+                //TODO:Make user profileActivity and set action on click on this marker
+
+                MarkerOptions markerOptions = new MarkerOptions()
+                        .position(latLng)
+                        .title(friends_names.get(friendID))//set friend name in title
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_friend));
+
+                markers.put(friendID, mMap.addMarker(markerOptions));
+                //make request for image
+                userHandler.getUserImageInBitmap(friends_location.get(i).getObjectId(), REQUEST_TAG, new GetFriendsBitmapListener(this,friendID));
+            }
+        }else{
+            for (int i = 0; i < friends_location.size(); i++) {
+                String friendID = friends_location.get(i).getObjectId();
+                animateMarker(markers.get(friendID),new LatLng(friends_location.get(i).getLat(),friends_location.get(i).getLng()),new LatLngInterpolator.Linear());
+            }
+        }
     }
     /**
-     *This function will do some job if logIn was unsuccessful.
+     *
+     *EXAMPLE:For UserHandler use
+     *=================================================================================================
      * */
-    public void onLogInFailure(String error){
-        Toast.makeText(MainActivity.this, "Error occur:\n"+ error.toString(),Toast.LENGTH_SHORT).show();
+    /**
+     *This function will do some job after request was successful.
+     * */
+    public void onFriendsInfoReady(JSONObject result){
+
+        try{
+            if(result.getBoolean("Success")){
+                JSONArray friendsInJson = result.getJSONArray("Data");
+
+                for(int i=0;i<friendsInJson.length();i++)
+                {
+                    JSONObject friendInJson = (JSONObject) friendsInJson.get(i);
+                    //fill hash map with friends name
+                    friends_names.put(friendInJson.getString("_id"),friendInJson.getString("name"));
+                    //Log.i(LOG_TAG,friendInJson.toString());
+                }
+            }else{
+                Log.e(LOG_TAG,result.getString("Error"));
+            }
+
+        }catch (JSONException exception)
+        {
+            Log.e(LOG_TAG,exception.toString());
+        }
+        //TODO: parse result and set friends hash map,result is array of user
+        //Toast.makeText(MainActivity.this, result.toString(),Toast.LENGTH_SHORT).show();
+    }
+    public void onFriendsBitmapReady(Bitmap image,String friendID){
+        Marker marker = markers.get(friendID);
+        marker.setIcon(BitmapDescriptorFactory.fromBitmap(image));
     }
 
     /**
-     * Static inner classes do not hold an implicit reference to their outher clases, so activity will not be leaked.
+     * Static inner classes do not hold an implicit reference to their outer classes, so activity will not be leaked.
      * Also because i need to access to an activity method i need to hold a reference to it. But i keep weakReference,
      * so GC will not be prevented from deleting it. Because of that i need to check whether activity still exist.
      * */
-    private static class GetAllUsersListener implements VolleyCallBack{
-        //TODO:Change MainActivity to activity
+    private static class GetFriendsInfoListener implements VolleyCallBack{
+
         private final WeakReference<MainActivity> mActivity;
-        GetAllUsersListener(MainActivity mainActivity){
-            mActivity = new WeakReference<MainActivity>(mainActivity);
+        GetFriendsInfoListener(MainActivity mainActivity){
+            mActivity = new WeakReference<>(mainActivity);
         }
         @Override
         public void onSuccess(JSONObject result) {
             MainActivity mainActivity = mActivity.get();
             if(mainActivity!=null)//If activity still exist then do some job, if not just return;
-                mainActivity.onLogIn(result);
+                mainActivity.onFriendsInfoReady(result);
         }
 
         @Override
         public void onFailed(String error) {
             MainActivity mainActivity = mActivity.get();
             if(mainActivity!=null)//If activity still exist then do some job, if not just return;
-                mainActivity.onLogInFailure(error);
+                Log.e(mainActivity.LOG_TAG,error);
+        }
+    }
+    private static class GetFriendsBitmapListener implements VolleyCallBackBitmap{
+        private final WeakReference<MainActivity> mActivity;
+        private String objectID;
+        GetFriendsBitmapListener(MainActivity mainActivity,String objectID){
+            mActivity = new WeakReference<>(mainActivity);
+            this.objectID= objectID;
+        }
+        @Override
+        public void onSuccess(Bitmap result) {
+            MainActivity mainActivity = mActivity.get();
+            if(mainActivity!=null){
+                mainActivity.onFriendsBitmapReady(result,this.objectID);
+            }
+        }
+
+        @Override
+        public void onFailed(String error) {
+            MainActivity mainActivity = mActivity.get();
+            if(mainActivity!=null)//If activity still exist then do some job, if not just return;
+                Log.e(mainActivity.LOG_TAG,error);
         }
     }
 }

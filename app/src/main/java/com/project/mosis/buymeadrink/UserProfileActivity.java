@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 
@@ -47,7 +49,8 @@ public class UserProfileActivity extends AppCompatActivity {
     private EditText inputName,inputEmail,inputNewPassword,inputOldPassword;
     private TextInputLayout inputLayoutName,inputLayoutNewPassword,inputLayoutOldPassword;
 
-    final String REQUSET_TAG = "UserProfileActivity";
+    private final String REQUSET_TAG = "UserProfileActivity";
+    private final String LOG_TAG = "UserProfileActivity";
     private UserHandler userHandler;
 
     @Override
@@ -131,9 +134,10 @@ public class UserProfileActivity extends AppCompatActivity {
             } else {
 
                     CropImage.activity(imageUri)
-                    .setGuidelines(CropImageView.Guidelines.ON)
-                    .setFixAspectRatio(true)
-                    .start(this);
+                            .setGuidelines(CropImageView.Guidelines.ON)
+                            .setFixAspectRatio(true)
+                            .start(this);
+
             }
         }
 
@@ -141,7 +145,15 @@ public class UserProfileActivity extends AppCompatActivity {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
                 imageUri = result.getUri();
-                userImage.setImageURI(imageUri);
+                try {
+                    //scale image to 500x500
+                    Bitmap croppedImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageUri);
+                    Bitmap scaledImage = Bitmap.createScaledBitmap(croppedImage,500,500,false);
+                    userImage.setImageBitmap(scaledImage);
+                } catch (IOException e) {
+                    Log.e(LOG_TAG,e.toString());
+                }
+                //userImage.setImageURI(imageUri);
                 isImageChanged= true;
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();

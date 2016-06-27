@@ -2,12 +2,11 @@ package com.project.mosis.buymeadrink.DataLayer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
+import android.graphics.Matrix;
 import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -16,10 +15,10 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NetworkImageView;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
+import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBackBitmap;
 import com.project.mosis.buymeadrink.R;
 import com.project.mosis.buymeadrink.Utils.Constants;
 import com.project.mosis.buymeadrink.Utils.VolleyHelperSingleton;
@@ -28,8 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-
 public class UserHandler {
 
     private VolleyHelperSingleton mVolleyHelper;
@@ -39,12 +36,7 @@ public class UserHandler {
 
         this.mVolleyHelper = VolleyHelperSingleton.getInstance(context);
     }
-    /**
-     *login function will try to log in user with given username and password.
-     *<p>
-     * If login is successful then onResponseLisener will run otherwise onErrorListener will be triggered.
-     *<p>
-     * */
+
     public static void logIn(Context context, String email , String password, String tag, final VolleyCallBack volleyCallBack){
 
         VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
@@ -136,6 +128,39 @@ public class UserHandler {
                 ImageLoader.getImageListener(imageView, R.mipmap.ic_default_user_image,R.mipmap.ic_default_user_image));
 
         imageView.setImageUrl(Constants.USER_IMAGE_URL + userID +".jpg",mImageLoader);
+    }
+    public void getUserImageInBitmap(String userID,String tag, final VolleyCallBackBitmap volleyCallBackBitmap){
+        ImageRequest imageRequest = new ImageRequest(Constants.USER_IMAGE_URL + userID + ".jpg", new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+                volleyCallBackBitmap.onSuccess(response);
+            }
+        }, 100, 100, ImageView.ScaleType.FIT_XY, Bitmap.Config.RGB_565 , new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                volleyCallBackBitmap.onFailed(error.toString());
+            }
+        });
+        imageRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(imageRequest);
+    }
+    //Return all friends of user with given id.
+    public void getUserFriends(String tag, String userID, final VolleyCallBack volleyCallBack){
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.USER_FRIENDS_URL+userID, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onFailed(error.toString());
+            }
+        });
+        jsonObjectRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
 
     public void  getAllUsers(String tag,final VolleyCallBack  volleyCallBack){
