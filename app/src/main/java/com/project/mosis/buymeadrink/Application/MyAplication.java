@@ -1,6 +1,8 @@
 package com.project.mosis.buymeadrink.Application;
 
 import android.app.Application;
+import android.content.Context;
+import android.support.multidex.MultiDex;
 
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 
@@ -16,5 +18,11 @@ public class MyAplication extends Application{
     }
     public void setUser(User user){
         this.user = user;
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 }

@@ -4,6 +4,7 @@ package com.project.mosis.buymeadrink;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -11,6 +12,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +25,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.NetworkImageView;
@@ -49,10 +53,12 @@ public class UserProfileActivity extends AppCompatActivity {
     private EditText inputName,inputEmail,inputNewPassword,inputOldPassword;
     private TextInputLayout inputLayoutName,inputLayoutNewPassword,inputLayoutOldPassword;
 
-    private final String REQUSET_TAG = "UserProfileActivity";
+    private final String REQUEST_TAG = "UserProfileActivity";
     private final String LOG_TAG = "UserProfileActivity";
     private UserHandler userHandler;
 
+    private ProgressDialog progressDialog;
+    private CoordinatorLayout coordinatorLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +66,8 @@ public class UserProfileActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.user_profile_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.user_profile_coordinator_layout);
 
         user = ((MyAplication) this.getApplication()).getUser();
         //I making new user because i need copy of user, not a reference. Real user object is stored in MyAplication class and its global for all activity
@@ -186,7 +194,7 @@ public class UserProfileActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        userHandler.cancelAllRequestWithTag(REQUSET_TAG);
+        userHandler.cancelAllRequestWithTag(REQUEST_TAG);
     }
 
     private User collectUserInfo(){
@@ -214,11 +222,13 @@ public class UserProfileActivity extends AppCompatActivity {
         inputLayoutOldPassword.setError("");
         if(isImageChanged){
             //TODO:Set progress bar
+            progressDialog = ProgressDialog.show(UserProfileActivity.this,"Please wait","Updating user info...",true,false);
             Bitmap userImageBitmap= ((BitmapDrawable)userImage.getDrawable()).getBitmap();
-            userHandler.updateUserInfoAndPicture(collectUserInfo(),REQUSET_TAG,userImageBitmap,new OnUserUpdateListener(this));
+            userHandler.updateUserInfoAndPicture(collectUserInfo(), REQUEST_TAG,userImageBitmap,new OnUserUpdateListener(this));
         }else{
             //TODO:Set progress bar
-            userHandler.updateUserInfo(collectUserInfo(),REQUSET_TAG,new OnUserUpdateListener(this));
+            progressDialog = ProgressDialog.show(UserProfileActivity.this,"Please wait","Updating user info...",true,false);
+            userHandler.updateUserInfo(collectUserInfo(), REQUEST_TAG,new OnUserUpdateListener(this));
         }
         //TODO:make request to server if everything ok then set shared preference and set global var just like in logIn activity
     }
@@ -311,23 +321,27 @@ public class UserProfileActivity extends AppCompatActivity {
         public void onFailed(String error) {
             UserProfileActivity userProfileActivity = mActivity.get();
             if(userProfileActivity!=null)//If activity still exist then do some job, if not just return;
+            {
                 userProfileActivity.onUserUpdateFailure(error);
+                userProfileActivity.progressDialog.dismiss();
+            }
         }
     }
 
     private void onUserUpdate(JSONObject result) {
         try {
             if (result.getBoolean("Success")) {
-                Toast.makeText(this,result.getString("Data"),Toast.LENGTH_LONG).show();
-                //Seting new user as global
+                //Set new user as global
                 ((MyAplication)this.getApplication()).setUser(updatedUser);
                 //Saving new User on storage for future use
                 SaveSharedPreference.SetUser(this,updatedUser);
+                progressDialog.dismiss();
                 //TODO:return in main activity with RESULT_OK
                 setResult(RESULT_OK);
                 finish();
             }else{
-                Toast.makeText(this,"Something goes wrong. Try again later.",Toast.LENGTH_LONG).show();
+                Snackbar.make(coordinatorLayout,"Something goes wrong, try again later.",Snackbar.LENGTH_LONG).show();
+                //Toast.makeText(this,"Something goes wrong. Try again later.",Toast.LENGTH_LONG).show();
             }
         }catch (JSONException exception){
             Toast.makeText(this,exception.toString(),Toast.LENGTH_LONG).show();
@@ -336,7 +350,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
     }
     private void onUserUpdateFailure(String error) {
-        Toast.makeText(this,"Failed to send data.",Toast.LENGTH_LONG).show();
+        Snackbar.make(coordinatorLayout,"Failed to update user, try again later.",Snackbar.LENGTH_LONG).show();
         Log.e("UserProfileActivity",error);
     }
 }

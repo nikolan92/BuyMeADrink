@@ -55,7 +55,7 @@ public class LocationService extends Service {
 
     //GPS parameters
     private float minDistance = (float) 1.5;//1m for testing 1m later will be 5m
-    private int minTime = 1000;//1s for testing 1s later will be 5s or 10s
+    private int minTime = 5000;//1s for testing 1s later will be 5s or 10s
     @Override
     public void onCreate() {
 
@@ -252,7 +252,7 @@ public class LocationService extends Service {
             if(coordinatesIsReady)
                 sendLocationAndReceiveFriendsLocation(LocationService.this.lat,LocationService.this.lng);
             //update friends location on every 2s, this fresh rate is high later may be on 5s for example
-            foregroundHandler.postDelayed(this,2000);
+            foregroundHandler.postDelayed(this,5000);
         }
     }
 

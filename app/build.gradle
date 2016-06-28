@@ -10,12 +10,19 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
+        // Enabling multidex support.
+        multiDexEnabled true
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    dexOptions {
+        incremental true
+        javaMaxHeapSize "4g"
     }
 }
 
@@ -37,4 +44,6 @@ dependencies {
     //Image crop
     compile 'com.theartofdev.edmodo:android-image-cropper:2.2.+'
 
+    //MultiDex dependencies
+    compile 'com.android.support:multidex:1.0.1'
 }

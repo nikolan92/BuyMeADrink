@@ -285,6 +285,7 @@ public class MainActivity extends AppCompatActivity
         if(requestCode == USER_PROFILE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
             user = ((MyAplication)getApplication()).getUser();
             loadUser();
+            Snackbar.make(drawer,"Profile is successfully updated.",Snackbar.LENGTH_LONG).show();
         }else if(requestCode == SETTINGS_ACTIVITY_REQUEST_CODE)
         {
             locationPermission();
