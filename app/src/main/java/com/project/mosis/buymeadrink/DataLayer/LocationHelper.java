@@ -40,7 +40,7 @@ public class LocationHelper {
                 jsonArray.put(user.getFriends().get(i));
 
             jsonObject.put("friends",jsonArray);
-        Log.d("JSONOBJECT:",jsonObject.toString());
+        //Log.d("JSONOBJECT:",jsonObject.toString());
 
         }catch (JSONException exception){
             Log.e("LocationHelper",exception.toString());
@@ -60,7 +60,7 @@ public class LocationHelper {
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
 
-    public void cancelAllRequestWithTag(String tag){
+    public void cancelAllRequestWithTag(){
         mVolleyHelper.cancelPendingRequests(REPORT_LOCATION_REQUEST_TAG);
         //TODO: When activity call onStop() this function must be caled because if you not call this fun Volley will call your handler and app will crash
     }

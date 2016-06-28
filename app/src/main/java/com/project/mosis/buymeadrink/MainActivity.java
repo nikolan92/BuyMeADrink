@@ -31,7 +31,6 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.android.volley.toolbox.NetworkImageView;
@@ -44,7 +43,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.JsonArray;
 import com.project.mosis.buymeadrink.Application.MyAplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.ObjectLocation;
@@ -149,7 +147,7 @@ public class MainActivity extends AppCompatActivity
         if(locationPermission){
             updateMapReceiver = new UpdateMapReceiver();
             IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(LocationService.ACTION_UPDATE_MAP);
+            intentFilter.addAction(LocationService.ACTION_UPDATE_FRIENDS_LOCATIONS);
             intentFilter.addAction(LocationService.ACTION_UPDATE_MY_LOCATION);
             registerReceiver(updateMapReceiver,intentFilter);
         }
@@ -333,7 +331,7 @@ public class MainActivity extends AppCompatActivity
             startService(new Intent(this, LocationService.class));
             updateMapReceiver = new UpdateMapReceiver();
             IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(LocationService.ACTION_UPDATE_MAP);
+            intentFilter.addAction(LocationService.ACTION_UPDATE_FRIENDS_LOCATIONS);
             registerReceiver(updateMapReceiver,intentFilter);
 
             bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
@@ -358,7 +356,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(LOG_TAG,intent.getAction());
-            if(intent.getAction().equals(LocationService.ACTION_UPDATE_MAP)) {
+            if(intent.getAction().equals(LocationService.ACTION_UPDATE_FRIENDS_LOCATIONS)) {
                 ArrayList<ObjectLocation> friends_location = intent.getParcelableArrayListExtra(LocationService.FRIENDS_LOCATIONS);
                 updateFriendsLocation(friends_location);
 

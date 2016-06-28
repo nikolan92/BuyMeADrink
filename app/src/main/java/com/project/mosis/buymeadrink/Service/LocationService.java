@@ -30,8 +30,8 @@ public class LocationService extends Service {
     }
 
     public final static String ACTION_UPDATE_MY_LOCATION = "ACTION_UPDATE_MY_LOCATION";
-    public final static String ACTION_UPDATE_MAP = "ACTION_UPDATE_MAP";
-    public final static String FRIENDS_LOCATIONS = "FRIENDS_LOCATION";
+    public final static String ACTION_UPDATE_FRIENDS_LOCATIONS = "ACTION_UPDATE_FRIENDS_LOCATIONS";
+    public final static String FRIENDS_LOCATIONS = "FRIENDS_LOCATIONS";
     public final static String MY_LOCATION = "MY_LOCATION";
     private final String LOG_TAG = "LocationService";
 
@@ -40,41 +40,49 @@ public class LocationService extends Service {
 
     private LocationHelper mLocationHelper;
 
-    private int range = 200;//200m
-    private Handler mHandler;
-    private ServiceMainThread serviceMainThread;
+
+    private Handler backgroundHandler,foregroundHandler;
+    private ServiceBackgroundThread serviceBackgroundThread;
+    private ServiceForegroundThread serviceForegroundThread;
     private LocationManager mLocationManager;
     private MyLocationListener locationListener;
 
-    //last location
+    //last updated location location
     private double lat=0,lng=0;
+    private boolean coordinatesIsReady = false;
+    //Range for notification messages
+    private int range = 100;//1m for testing 1m later will be 5m
 
-    private int refreshRate = 5000;//5s
+    //GPS parameters
+    private float minDistance = (float) 1.5;//1m for testing 1m later will be 5m
+    private int minTime = 1000;//1s for testing 1s later will be 5s or 10s
     @Override
     public void onCreate() {
 
         super.onCreate();
         Log.i(LOG_TAG,"onCreate");
 
-            User user = SaveSharedPreference.GetUser(this);
-            //This should not ever happen
+        User user = SaveSharedPreference.GetUser(this);
+        //This should not ever happen
 
-            mLocationHelper = new LocationHelper(this,user);
-
-            mHandler = new Handler();
-            serviceMainThread = new ServiceMainThread();
+        mLocationHelper = new LocationHelper(this,user);
 
 
-            mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            //mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,10,locationListener);
-            locationListener = new MyLocationListener();
+        backgroundHandler = new Handler();
+        foregroundHandler = new Handler();
 
-            try {
-                //One single location update with NETWORK_PROVIDER to speedup first load.
-                mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, null);
-            }catch (SecurityException exception){
-                Log.e(LOG_TAG,exception.toString());
-            }
+        serviceBackgroundThread = new ServiceBackgroundThread();
+        serviceForegroundThread = new ServiceForegroundThread();
+
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new MyLocationListener();
+
+//            try {
+//                //singe request for location with(NETWORK_PROVIDER) will speed up first time loading, GPS is slow
+//                mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, null);
+//            }catch (SecurityException exception){
+//                Log.e(LOG_TAG,exception.toString());
+//            }
     }
 
     private void backUpService() {
@@ -89,21 +97,19 @@ public class LocationService extends Service {
         this.range = range;
     }
 
-    /**
-     * <p>Set refresh rate for ServiceMainThread</p>
-     * @param refreshRate In milliseconds.
-     * */
-    public void setRefreshRate(int refreshRate) {
-
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
         Log.i(LOG_TAG,"onBind");
         isBind = true;
-        mHandler.removeCallbacks(serviceMainThread);
+        //start foreground thread
+        foregroundHandler.post(serviceForegroundThread);
+        //stop background thread
+        backgroundHandler.removeCallbacks(serviceBackgroundThread);
         try {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, refreshRate, range, locationListener);
+            // singe request for location with(NETWORK_PROVIDER) will speed up first time loading, GPS is slow
+            mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, null);
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, locationListener);
         }catch (SecurityException exception) {
             Log.e(LOG_TAG,exception.toString());
         }
@@ -114,9 +120,14 @@ public class LocationService extends Service {
     public void onRebind(Intent intent) {
         Log.i(LOG_TAG,"onRebind");
         isBind = true;
-        mHandler.removeCallbacks(serviceMainThread);
+        //start foreground thread
+        foregroundHandler.post(serviceForegroundThread);
+        //stop background thread
+        backgroundHandler.removeCallbacks(serviceBackgroundThread);
         try {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, refreshRate, range, locationListener);
+            // singe request for location with(NETWORK_PROVIDER) will speed up first time loading, GPS is slow
+            mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, null);
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, locationListener);
         }catch (SecurityException exception) {
             Log.e(LOG_TAG,exception.toString());
         }
@@ -131,7 +142,13 @@ public class LocationService extends Service {
         }catch (SecurityException exception) {
             Log.e(LOG_TAG,exception.toString());
         }
-        mHandler.postDelayed(serviceMainThread,5000);
+
+        //stop foreground thread
+        foregroundHandler.removeCallbacks(serviceForegroundThread);
+        //start background thread to report location in background after 5s
+        // (maybe user just go in another activity for short time, this should be 1m for example)
+        // but now for testing is 5s
+        backgroundHandler.postDelayed(serviceBackgroundThread,5000);
 
         //Return true, allow rebind function
         return true;
@@ -140,10 +157,10 @@ public class LocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(intent==null) {
-            //Toast.makeText(this, "Service onStartCommand.\nIntent is null.", Toast.LENGTH_LONG).show();
             Log.i(LOG_TAG,"onStartCommand, \nstart_id:"+startId+"\nIntent:Is NULL");
-            mHandler.post(serviceMainThread);//If service is killed or app removed from recent apps intent will be null, in that case it is logical
-            // that activity is no longer used so now a can create battery friendly thread ServiceMainThread for reporting locations.
+            backgroundHandler.post(serviceBackgroundThread);//If service is killed or app removed from recent apps intent will be null, in that case it is logical
+            // that activity is no longer used, so now a can create battery friendly thread ServiceBackgroundThread for reporting locations.
+            // This thread using locating from NETWORK_PROVIDE in a way that it uses less battery.
         }
         //Restart service if it gets terminated.
         Log.i(LOG_TAG,"onStartCommand, \nstart_id:"+startId+"\nIntent:Not NULL");
@@ -153,10 +170,12 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(serviceMainThread!=null)
-            mHandler.removeCallbacks(serviceMainThread);
+        //on destroy remove all running thread if running
+        backgroundHandler.removeCallbacks(serviceBackgroundThread);
+        backgroundHandler.removeCallbacks(serviceForegroundThread);
+        //cancel all request to the server
+        mLocationHelper.cancelAllRequestWithTag();
         Log.i(LOG_TAG,"Service destroyed.");
-        //Toast.makeText(this, "Service destroyed.", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -165,46 +184,43 @@ public class LocationService extends Service {
         mLocationHelper.sendCurrentLocationAndReceiveNearbyPlaces(lat,lng,range,new VolleyCallBack() {
             @Override
             public void onSuccess(JSONObject result) {
-                //Toast.makeText(LocationService.this,result.toString(),Toast.LENGTH_LONG).show();
-                Log.i(LOG_TAG,result.toString());
-                ArrayList<ObjectLocation> friendsLocations = new ArrayList<>();
-//                myAndFriendsLocations.add(new ObjectLocation("",LocationService.this.lat,LocationService.this.lng));
-                try {
-                    if (result.getBoolean("Success")){
-                        JSONObject data = result.getJSONObject("Data");
+                //is is not main activity is not in use then don't parse data
+                //just return
+                if(isBind){
 
-                        JSONArray jsonArray = data.getJSONArray("friends_location");
+                    Log.i(LOG_TAG, "Locations received, Data:" + result.toString());
+                    ArrayList<ObjectLocation> friendsLocations = new ArrayList<>();
+                    try {
+                        if (result.getBoolean("Success")) {
+                            JSONObject data = result.getJSONObject("Data");
 
-                        for(int i=0;i<jsonArray.length();i++){
-                            friendsLocations.add(new Gson().fromJson(jsonArray.get(i).toString(),ObjectLocation.class));
+                            JSONArray jsonArray = data.getJSONArray("friends_location");
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                friendsLocations.add(new Gson().fromJson(jsonArray.get(i).toString(), ObjectLocation.class));
+                            }
                         }
+                    } catch (JSONException exception) {
+                        Log.e(LOG_TAG, exception.toString());
+                    } catch (Exception exception) {
+                        Log.e(LOG_TAG, exception.toString());
                     }
-                }catch (JSONException exception){
-                    Log.e(LOG_TAG,exception.toString());
-                }catch (Exception exception){
-                    Log.e(LOG_TAG,exception.toString());
-                }
 
-                if(friendsLocations.size()!=0){
-//                    for(int i=0;friendsLocations.size()>i;i++)
-//                        Log.i(LOG_TAG, friendsLocations.get(i).toString());
-                    //"for" is test///
-
-                    //if is bind then send data to activity with broadCast
-                    if(isBind) {
+                    if (friendsLocations.size() != 0) {
                         Intent intent = new Intent();
-                        intent.setAction(ACTION_UPDATE_MAP);
+                        intent.setAction(ACTION_UPDATE_FRIENDS_LOCATIONS);
                         intent.putParcelableArrayListExtra(FRIENDS_LOCATIONS, friendsLocations);
                         sendBroadcast(intent);
                     }
+                }else{
+                    //TODO: here just parse nearby places and make notification for nearby places if exist
                 }
                 //TODO: make notification if condition are met.
             }
             @Override
             public void onFailed(String error) {
                 //Do nothing here.
-                //Toast.makeText(LocationService.this,error,Toast.LENGTH_LONG).show();
-                Log.e(LOG_TAG,error);
+                Log.e(LOG_TAG,"Error in function send current location and receive friends locations.\n" + error);
             }
         });
     }
@@ -212,57 +228,86 @@ public class LocationService extends Service {
 
     }
     /**
-     * <p>This class periodically call singleLocationRequest, refresh rate depends:</p>
-     * <p>- if user using app, refresh rate is higher or if user don't use app then refresh rate is 5m.</p>
+     * <p>This class running in background and when mainActivity (app) is not in use, and report location to the server,
+     * </p>
      * */
-    private class ServiceMainThread implements Runnable {
+    private class ServiceBackgroundThread implements Runnable {
         @Override
         public void run() {
-            Log.i(LOG_TAG,"ServiceMainThread triggered. Is bind:"+String.valueOf(isBind));
+            Log.i(LOG_TAG,"ServiceBackgroundThread triggered. Is bind:"+String.valueOf(isBind));
             try{
                 mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, null);
             }catch (SecurityException exception){
                 Log.e(LOG_TAG,exception.toString());
             }
-            mHandler.postDelayed(this,300000);//Callback on every 5m, this is when user don't use application.
+            backgroundHandler.postDelayed(this,15000);//300000Callback on every 5m, this is when user don't use application.
         }
     }
+    private class ServiceForegroundThread implements Runnable{
+
+        @Override
+        public void run() {
+            Log.i(LOG_TAG,"ServiceForegroundThread triggered. Is bind:"+String.valueOf(isBind));
+            //if coordinates is ready, send last know coordinates
+            if(coordinatesIsReady)
+                sendLocationAndReceiveFriendsLocation(LocationService.this.lat,LocationService.this.lng);
+            //update friends location on every 2s, this fresh rate is high later may be on 5s for example
+            foregroundHandler.postDelayed(this,2000);
+        }
+    }
+
     private class MyLocationListener implements LocationListener{
 
         @Override
         public void onLocationChanged(Location location) {
             Log.i(LOG_TAG,"onLocationChanged");
-            //LocationService.this.lat = location.getLatitude();
-            //LocationService.this.lng = location.getLongitude();
-            sendLocationAndReceiveFriendsLocation(location.getLatitude(),location.getLongitude());
+            LocationService.this.lat = location.getLatitude();
+            LocationService.this.lng = location.getLongitude();
+
+            //this var "coordinatesIsReady" is needed only for the first time when service is started
+            //and preventing foreground thread from sending bad location on the server.
+            LocationService.this.coordinatesIsReady = true;
+            //if app is in use:
+            // 1.Update user location in mainActivity.
+            // 2.Foreground thread will call function sendLocationAndReceiveFriendsLocation(...) and this function after data receive from server
+            // will call mainActivity to update friends locations on map.
+            // Otherwise if app is not in use just report location on the server.
             if(isBind){
                 Intent intent = new Intent();
                 intent.setAction(ACTION_UPDATE_MY_LOCATION);
                 intent.putExtra(MY_LOCATION,new ObjectLocation("",location.getLatitude(),location.getLongitude()));
                 sendBroadcast(intent);
+            }else{
+                sendLocationAndReceiveFriendsLocation(location.getLatitude(),location.getLongitude());
             }
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.i(LOG_TAG,"onStatusChanged");
+            //Log.i(LOG_TAG,"onStatusChanged");
         }
 
         @Override
         public void onProviderEnabled(String provider) {
             Log.i(LOG_TAG,"onProviderEnabled");
-            //run callback thread again
-            if(!isBind){
-                mHandler.post(serviceMainThread);
+            //If app is in use and provider is on again, start foreground thread.
+            //Otherwise if app is not in use start background thread
+            if(isBind){
+                foregroundHandler.post(serviceForegroundThread);
+            }else{
+                backgroundHandler.post(serviceBackgroundThread);
             }
         }
 
         @Override
         public void onProviderDisabled(String provider) {
             Log.i(LOG_TAG,"onProviderDisabled");
-            mHandler.removeCallbacks(serviceMainThread);
+            //if provider is disabled stop all threads, this should not crash if thread not running.
+            backgroundHandler.removeCallbacks(serviceBackgroundThread);
+            foregroundHandler.removeCallbacks(serviceForegroundThread);
         }
     }
+
     public class MyBinder extends Binder{
         public LocationService getService(){
             return LocationService.this;
