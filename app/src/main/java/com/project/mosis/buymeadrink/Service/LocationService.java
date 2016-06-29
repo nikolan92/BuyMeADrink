@@ -53,6 +53,8 @@ public class LocationService extends Service {
     private Handler backgroundHandler,foregroundHandler;
     private ServiceBackgroundThread serviceBackgroundThread;
     private ServiceForegroundThread serviceForegroundThread;
+    private final int backgroundThreadRefreshRate= 3600000;//1h
+    private final int foregroundThreadRefreshRate= 60000;//1m
     private LocationManager mLocationManager;
     private MyLocationListener locationListener;
 
@@ -252,7 +254,7 @@ public class LocationService extends Service {
 
                                         @Override
                                         public void onFailed(String error) {
-                                            Log.i(LOG_TAG, error);
+                                            Log.e(LOG_TAG, error);
                                         }
                                     });
                                 }
@@ -290,6 +292,8 @@ public class LocationService extends Service {
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
             }
+            if(friend==null)
+                return;
             int FRIEND_NOTIFICATION_ID = 1;
             String tmp = friends_in_nearby==1?
                     "Your friend " + friend.getName()+" is in your nearby.":
@@ -328,7 +332,7 @@ public class LocationService extends Service {
             }catch (SecurityException exception){
                 Log.e(LOG_TAG,exception.toString());
             }
-            backgroundHandler.postDelayed(this,15000);//300000Callback on every 5m, this is when user don't use application.
+            backgroundHandler.postDelayed(this,backgroundThreadRefreshRate);
         }
     }
     private class ServiceForegroundThread implements Runnable{
@@ -340,7 +344,7 @@ public class LocationService extends Service {
             if(coordinatesIsReady)
                 sendLocationAndReceiveFriendsLocation(LocationService.this.lat,LocationService.this.lng);
             //update friends location on every 2s, this fresh rate is high later may be on 5s for example
-            foregroundHandler.postDelayed(this,5000);
+            foregroundHandler.postDelayed(this,foregroundThreadRefreshRate);
         }
     }
 
