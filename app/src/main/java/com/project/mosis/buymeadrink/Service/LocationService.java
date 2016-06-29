@@ -22,7 +22,6 @@ import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.ObjectLocation;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
-import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBackBitmap;
 import com.project.mosis.buymeadrink.DataLayer.LocationHelper;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 import com.project.mosis.buymeadrink.MainActivity;
@@ -54,7 +53,7 @@ public class LocationService extends Service {
     private ServiceBackgroundThread serviceBackgroundThread;
     private ServiceForegroundThread serviceForegroundThread;
     private final int backgroundThreadRefreshRate= 3600000;//1h
-    private final int foregroundThreadRefreshRate= 60000;//1m
+    private final int foregroundThreadRefreshRate= 15000;//15s
     private LocationManager mLocationManager;
     private MyLocationListener locationListener;
 
@@ -65,8 +64,8 @@ public class LocationService extends Service {
     private int range = 100;//this is range for notification
 
     //GPS parameters
-    private float minDistance = (float) 1.5;//1m for testing 1m later will be 5m
-    private int minTime = 5000;//1s for testing 1s later will be 5s or 10s
+    private float minDistance = (float) 1.5;//1.5m
+    private int minTime = 30000;//30s
     @Override
     public void onCreate() {
 
@@ -159,7 +158,7 @@ public class LocationService extends Service {
         //start background thread to report location in background after 5s
         // (maybe user just go in another activity for short time, this should be 1m for example)
         // but now for testing is 5s
-        backgroundHandler.postDelayed(serviceBackgroundThread,5000);
+        backgroundHandler.postDelayed(serviceBackgroundThread,backgroundThreadRefreshRate);
 
         //Return true, allow rebind function
         return true;
@@ -169,9 +168,10 @@ public class LocationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(intent==null) {
             Log.i(LOG_TAG,"onStartCommand, \nstart_id:"+startId+"\nIntent:Is NULL");
-            backgroundHandler.post(serviceBackgroundThread);//If service is killed or app removed from recent apps intent will be null, in that case it is logical
+            backgroundHandler.postDelayed(serviceBackgroundThread,backgroundThreadRefreshRate);//If service is killed or app removed from recent apps intent will be null, in that case it is logical
             // that activity is no longer used, so now a can create battery friendly thread ServiceBackgroundThread for reporting locations.
             // This thread using locating from NETWORK_PROVIDE in a way that it uses less battery.
+            //Note:Background thread will start after some time (1h for example) because is stupid to make notification just after user leave app.
         }
         //Restart service if it gets terminated.
         Log.i(LOG_TAG,"onStartCommand, \nstart_id:"+startId+"\nIntent:Not NULL");

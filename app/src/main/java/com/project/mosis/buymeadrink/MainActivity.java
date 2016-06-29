@@ -528,7 +528,7 @@ public class MainActivity extends AppCompatActivity
                 Log.e(mainActivity.LOG_TAG,error);
         }
     }
-    private static class GetFriendsBitmapListener implements VolleyCallBackBitmap{
+    private static class GetFriendsBitmapListener implements VolleyCallBackBitmap {
         private final WeakReference<MainActivity> mActivity;
         private String objectID;
         GetFriendsBitmapListener(MainActivity mainActivity,String objectID){
