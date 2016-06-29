@@ -198,7 +198,7 @@ public class LocationService extends Service {
                 //Otherwise is there is some object in nearby show notification
                 if(isBind){
 
-                    Log.i(LOG_TAG, "Locations received, Data:" + result.toString());
+                    Log.i(LOG_TAG, "Function sendLocationAndReceiveFriendsLocation\nLocations received, Data:" + result.toString());
                     ArrayList<ObjectLocation> friendsLocations = new ArrayList<>();
                     try {
                         if (result.getBoolean("Success")) {
