@@ -291,7 +291,7 @@ public class LocationService extends Service {
                 Log.e(LOG_TAG, exception.toString());
             }
             int FRIEND_NOTIFICATION_ID = 1;
-            String tmp = friends_in_nearby==0?
+            String tmp = friends_in_nearby==1?
                     "Your friend " + friend.getName()+" is in your nearby.":
                     "Your friend " + friend.getName()+" is in your nearby and "+(friends_in_nearby-1)+" more.";
             NotificationCompat.Builder  mBuilder = new NotificationCompat.Builder(this)
