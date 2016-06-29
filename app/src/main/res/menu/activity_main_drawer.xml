@@ -4,23 +4,23 @@
     <group>
         <item
             android:id="@+id/nav_add_question"
-            android:icon="@drawable/ic_menu_gallery"
+            android:icon="@drawable/ic_add_question"
             android:title="Add Question" />
         <item
             android:id="@+id/nav_my_profile"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_my_profile"
             android:title="My Profile" />
         <item
             android:id="@+id/nav_add_friend"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_add_friend"
             android:title="Add Friend" />
         <item
             android:id="@+id/nav_my_friends"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_my_friends"
             android:title="My Friends" />
         <item
             android:id="@+id/nav_rank_list"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_rank_list"
             android:title="Rank List" />
     </group>
 
@@ -28,11 +28,11 @@
         <menu>
             <item
                 android:id="@+id/nav_setings"
-                android:icon="@drawable/ic_menu_share"
+                android:icon="@drawable/ic_settings"
                 android:title="Setings" />
             <item
                 android:id="@+id/nav_log_out"
-                android:icon="@drawable/ic_menu_send"
+                android:icon="@drawable/ic_log_out"
                 android:title="LogOut" />
         </menu>
     </item>
