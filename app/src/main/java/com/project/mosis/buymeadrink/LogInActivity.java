@@ -1,7 +1,7 @@
 package com.project.mosis.buymeadrink;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,7 +30,9 @@ import java.lang.ref.WeakReference;
 public class LogInActivity extends AppCompatActivity {
     private EditText inputEmail,inputPassword;
     private TextInputLayout inputLayoutEmail,inputLayoutPassword;
-    final String REQUSET_TAG = "LogInActivity";
+    private final String REQUEST_TAG = "LogInActivity";
+
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,13 +93,14 @@ public class LogInActivity extends AppCompatActivity {
     }
 
     private void onLogIn(JSONObject result) {
+        progressDialog.dismiss();
         try{
             if(result.getBoolean("Success"))
             {
                 User user = new Gson().fromJson(result.getString("Data"),User.class);
 
 
-                //set just loged user as gloabal variable (this var live togeder with app)
+                //set just logged user as global variable (this var live together with app)
                 ((MyAplication) LogInActivity.this.getApplication()).setUser(user);
 
                 //store user in local storage with sharedPreference
@@ -115,6 +118,7 @@ public class LogInActivity extends AppCompatActivity {
         }
     }
     private void onLogInFailure(String error) {
+        progressDialog.dismiss();
         Toast.makeText(this,"Volley error during logIn:"+ error.toString(),Toast.LENGTH_LONG).show();
     }
 
@@ -129,8 +133,9 @@ public class LogInActivity extends AppCompatActivity {
         if (!validatePassword()) {
             return;
         }
+        progressDialog = ProgressDialog.show(this,"Please wait","LogIn in progress...",false,false);
         //TODO:Make request to server and if log in is ok set user variable as global variable and set shared preference
-        UserHandler.logIn(this,inputEmail.getText().toString(),inputPassword.getText().toString(),REQUSET_TAG,new OnLogInListener(LogInActivity.this));
+        UserHandler.logIn(this,inputEmail.getText().toString(),inputPassword.getText().toString(), REQUEST_TAG,new OnLogInListener(LogInActivity.this));
     }
     private boolean validateEmail() {
         String email = inputEmail.getText().toString().trim();

@@ -163,6 +163,41 @@ public class UserHandler {
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
 
+    public static void getUserStatic(Context context,String userID,String tag,final VolleyCallBack volleyCallBack){
+        VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.USER_URL+"/"+userID, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onFailed(error.toString());
+            }
+        });
+        jsonObjectRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(jsonObjectRequest);
+    }
+    public static void getUserBitmapStatic(Context context,String userID,String tag,final VolleyCallBackBitmap volleyCallBackBitmap){
+        VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
+        ImageRequest imageRequest = new ImageRequest(Constants.USER_IMAGE_URL + userID + ".jpg", new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+                volleyCallBackBitmap.onSuccess(response);
+            }
+        }, 200, 200, ImageView.ScaleType.FIT_XY, Bitmap.Config.RGB_565 , new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                volleyCallBackBitmap.onFailed(error.toString());
+            }
+        });
+        imageRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(imageRequest);
+    }
+
     public void  getAllUsers(String tag,final VolleyCallBack  volleyCallBack){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.USER_URL, null, new Response.Listener<JSONObject>() {
             @Override

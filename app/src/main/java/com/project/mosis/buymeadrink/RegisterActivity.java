@@ -1,5 +1,6 @@
 package com.project.mosis.buymeadrink;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -31,15 +32,14 @@ public class RegisterActivity extends AppCompatActivity {
     private Button signUp;
     private EditText inputName,inputEmail,inputPassword;
     private TextInputLayout inputLayoutName,inputLayoutEmail,inputLayoutPassword;
-    final String REQUSET_TAG = "RegisterActivity";
-    private UserHandler userHandler;
+    private final String REQUEST_TAG = "RegisterActivity";
+    private ProgressDialog progressDialog;
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        userHandler =new UserHandler(this);
         signUp = (Button) findViewById(R.id.register_btn_sign_up);
         inputLayoutName = (TextInputLayout) findViewById(R.id.register_input_layout_name);
         inputLayoutEmail = (TextInputLayout) findViewById(R.id.register_input_layout_email);
@@ -87,6 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
     private void onRegister(JSONObject result){
+        progressDialog.dismiss();
         try{
             if(result.getBoolean("Success"))
             {
@@ -95,7 +96,7 @@ public class RegisterActivity extends AppCompatActivity {
                 String name = user.getName().split(" ")[0];
                 name = (name.equals(""))?user.getName():name;//case when user don't enter fullName
 
-                //set just loged user as gloabal variable (this var live togeder with app)
+                //set just logged user as global variable (this var live together with app)
                 ((MyAplication) RegisterActivity.this.getApplication()).setUser(user);
 
                 //store user in local storage with sharedPreference
@@ -103,7 +104,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 //start mainActivity and clear back stack
                 startActivity(new Intent(RegisterActivity.this,MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                Toast.makeText(this, "Wlelcome to our aplication "+ name, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Welcome to our application "+ name, Toast.LENGTH_SHORT).show();
                 finish();
 
             }else{
@@ -114,6 +115,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
     private void onRegisterFailure(String error){
+        progressDialog.dismiss();
         Toast.makeText(this,"Volley error during register:"+ error.toString(),Toast.LENGTH_LONG).show();
     }
     //TODO:See logIn Activity Note:When data arive from server use Gson libraty to make user object from json
@@ -132,8 +134,9 @@ public class RegisterActivity extends AppCompatActivity {
         if (!validatePassword()) {
             return;
         }
+        progressDialog = ProgressDialog.show(this,"Please wait","Registation in progress",false,false);
         //TODO:make request to server if everything ok then set shared preference and set global var just like in logIn activity
-        UserHandler.register(this,collectUserInfo(),REQUSET_TAG,new OnRegisterListener(this));
+        UserHandler.register(this,collectUserInfo(), REQUEST_TAG,new OnRegisterListener(this));
     }
     private User collectUserInfo(){
         return new User(inputName.getText().toString(),inputEmail.getText().toString(),inputPassword.getText().toString());

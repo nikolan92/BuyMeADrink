@@ -1,8 +1,11 @@
 package com.project.mosis.buymeadrink.Service;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -10,6 +13,8 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -17,7 +22,11 @@ import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.ObjectLocation;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
+import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBackBitmap;
 import com.project.mosis.buymeadrink.DataLayer.LocationHelper;
+import com.project.mosis.buymeadrink.DataLayer.UserHandler;
+import com.project.mosis.buymeadrink.MainActivity;
+import com.project.mosis.buymeadrink.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,7 +43,7 @@ public class LocationService extends Service {
     public final static String FRIENDS_LOCATIONS = "FRIENDS_LOCATIONS";
     public final static String MY_LOCATION = "MY_LOCATION";
     private final String LOG_TAG = "LocationService";
-
+    private final String REQUEST_TAG = "LocationService";
     private final IBinder mBinder = new MyBinder();
     private boolean isBind = false;
 
@@ -51,7 +60,7 @@ public class LocationService extends Service {
     private double lat=0,lng=0;
     private boolean coordinatesIsReady = false;
     //Range for notification messages
-    private int range = 100;//1m for testing 1m later will be 5m
+    private int range = 100;//this is range for notification
 
     //GPS parameters
     private float minDistance = (float) 1.5;//1m for testing 1m later will be 5m
@@ -174,7 +183,8 @@ public class LocationService extends Service {
         backgroundHandler.removeCallbacks(serviceBackgroundThread);
         backgroundHandler.removeCallbacks(serviceForegroundThread);
         //cancel all request to the server
-        mLocationHelper.cancelAllRequestWithTag();
+        mLocationHelper.cancelAllRequest();
+        UserHandler.CancelAllRequestWithTagStatic(this,REQUEST_TAG);
         Log.i(LOG_TAG,"Service destroyed.");
     }
 
@@ -184,8 +194,8 @@ public class LocationService extends Service {
         mLocationHelper.sendCurrentLocationAndReceiveNearbyPlaces(lat,lng,range,new VolleyCallBack() {
             @Override
             public void onSuccess(JSONObject result) {
-                //is is not main activity is not in use then don't parse data
-                //just return
+                //is is not main activity is not in use then parse friends locations data
+                //Otherwise is there is some object in nearby show notification
                 if(isBind){
 
                     Log.i(LOG_TAG, "Locations received, Data:" + result.toString());
@@ -213,6 +223,52 @@ public class LocationService extends Service {
                         sendBroadcast(intent);
                     }
                 }else{
+                    try{
+                        if(result.getBoolean("Success")){
+                            JSONObject data = result.getJSONObject("Data");
+
+                            JSONArray jsonArray = data.getJSONArray("questions_in_nearby");
+
+                            //if questions and friends arrives as object in nearby question have
+                            //bigger priority than friends in nearby. so question will be shown in notification.
+                            //Otherwise friends will be in notification
+                            if(jsonArray.length()>0){
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    //TODO:make request for question to the server
+                                }
+                            }else{
+                                jsonArray = data.getJSONArray("friends_in_nearby");
+                                if(jsonArray.length()>0) {
+                                    String friendID = jsonArray.get(0).toString();
+                                    //Make request for user info and picture
+                                    final int friends_num = jsonArray.length();
+                                    UserHandler.getUserStatic(LocationService.this, friendID, REQUEST_TAG, new VolleyCallBack() {
+                                        private int friends_in_nearby_num = friends_num;
+
+                                        @Override
+                                        public void onSuccess(JSONObject result) {
+                                            makeNotification(result, friends_in_nearby_num, true);
+                                        }
+
+                                        @Override
+                                        public void onFailed(String error) {
+                                            Log.i(LOG_TAG, error);
+                                        }
+                                    });
+                                }
+                                //UserHandler.getUserBitmapStatic(LocationService.this,friendID,REQUEST_TAG,);
+                            }
+
+                        }else{
+                            Log.i(LOG_TAG,result.getString("Error"));
+                        }
+
+                    } catch (JSONException exception) {
+                        Log.e(LOG_TAG, exception.toString());
+                    } catch (Exception exception) {
+                        Log.e(LOG_TAG, exception.toString());
+                    }
+                    //makeNotification();
                     //TODO: here just parse nearby places and make notification for nearby places if exist
                 }
                 //TODO: make notification if condition are met.
@@ -224,7 +280,39 @@ public class LocationService extends Service {
             }
         });
     }
-    private void makeNotification(){
+    private void makeNotification(JSONObject result,int friends_in_nearby,boolean isFriend){
+        if(isFriend) {
+            User friend=null;
+            try {
+                friend = new Gson().fromJson(result.getString("Data"), User.class);
+            } catch (JSONException exception) {
+                Log.e(LOG_TAG, exception.toString());
+            } catch (Exception exception) {
+                Log.e(LOG_TAG, exception.toString());
+            }
+            int FRIEND_NOTIFICATION_ID = 1;
+            String tmp = friends_in_nearby==0?
+                    "Your friend " + friend.getName()+" is in your nearby.":
+                    "Your friend " + friend.getName()+" is in your nearby and "+(friends_in_nearby-1)+" more.";
+            NotificationCompat.Builder  mBuilder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.ic_default_friend)
+                    .setContentTitle("Friends in nearby")
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(tmp))
+                    .setContentText(tmp)
+                    .setAutoCancel(true)
+                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                    .setLights(Color.CYAN,1000,500);
+
+                        Intent intent = new Intent(this, MainActivity.class);
+            PendingIntent mainActivityPendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.setContentIntent(mainActivityPendingIntent);
+            NotificationManager mManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mManager.notify(FRIEND_NOTIFICATION_ID,mBuilder.build());
+        }else{
+            //TODO:Parse data for question
+
+        }
+
 
     }
     /**
@@ -313,5 +401,6 @@ public class LocationService extends Service {
             return LocationService.this;
         }
     }
+
 }
 

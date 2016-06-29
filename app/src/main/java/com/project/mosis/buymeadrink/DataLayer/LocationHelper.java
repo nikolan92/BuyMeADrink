@@ -60,7 +60,7 @@ public class LocationHelper {
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
 
-    public void cancelAllRequestWithTag(){
+    public void cancelAllRequest(){
         mVolleyHelper.cancelPendingRequests(REPORT_LOCATION_REQUEST_TAG);
         //TODO: When activity call onStop() this function must be caled because if you not call this fun Volley will call your handler and app will crash
     }

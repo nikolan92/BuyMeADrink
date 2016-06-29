@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public class UsersRankActivity extends AppCompatActivity {
 
-    final String REQUSET_TAG = "UsersRankActivity";
+    final String REQUEST_TAG = "UsersRankActivity";
     private UserHandler userHandler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,7 @@ public class UsersRankActivity extends AppCompatActivity {
         t.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                userHandler.getAllUsers(REQUSET_TAG,new GetAllUsersListener(UsersRankActivity.this));
+                userHandler.getAllUsers(REQUEST_TAG,new GetAllUsersListener(UsersRankActivity.this));
             }
         });
     }
@@ -111,6 +111,6 @@ public class UsersRankActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        userHandler.cancelAllRequestWithTag(REQUSET_TAG);
+        userHandler.cancelAllRequestWithTag(REQUEST_TAG);
     }
 }
