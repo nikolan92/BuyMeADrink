@@ -46,26 +46,25 @@ public class LocationService extends Service {
     private final IBinder mBinder = new MyBinder();
     private boolean isBind = false;
 
+    //class for network support
     private LocationHelper mLocationHelper;
-
-
+    //Thread var and settings
     private Handler backgroundHandler,foregroundHandler;
     private ServiceBackgroundThread serviceBackgroundThread;
     private ServiceForegroundThread serviceForegroundThread;
-    private final int backgroundThreadRefreshRate= 3600000;//1h
-    private final int foregroundThreadRefreshRate= 15000;//15s
+    private final int backgroundThreadRefreshRate= 600000;//10m
+    private final int foregroundThreadRefreshRate= 10000;//15s
+    //Location manager and lister
     private LocationManager mLocationManager;
     private MyLocationListener locationListener;
-
-    //last updated location location
-    private double lat=0,lng=0;
-    private boolean coordinatesIsReady = false;
     //Range for notification messages
     private int range = 100;//this is range for notification
-
     //GPS parameters
     private float minDistance = (float) 1.5;//1.5m
     private int minTime = 30000;//30s
+    //last updated location location
+    private double lat=0,lng=0;
+    private boolean coordinatesIsReady = false;
     @Override
     public void onCreate() {
 
@@ -73,10 +72,8 @@ public class LocationService extends Service {
         Log.i(LOG_TAG,"onCreate");
 
         User user = SaveSharedPreference.GetUser(this);
-        //This should not ever happen
 
         mLocationHelper = new LocationHelper(this,user);
-
 
         backgroundHandler = new Handler();
         foregroundHandler = new Handler();
@@ -95,18 +92,9 @@ public class LocationService extends Service {
 //            }
     }
 
-    private void backUpService() {
-        //TODO:Save LRU cache in SharedPreference
-    }
-
-    private void restoreService() {
-        //TODO:Restore LRU cache from SharedPreference
-    }
-
     public void setRange(int range) {
         this.range = range;
     }
-
 
     @Override
     public IBinder onBind(Intent intent) {

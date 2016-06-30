@@ -25,4 +25,6 @@
 
     <string name="action_settings">Setings</string>
     <string name="err_msg_old_password">Your old password is not correct!</string>
+    <string name="no_data">No data</string>
+    <string name="rating">Rating</string>
 </resources>

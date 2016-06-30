@@ -20,7 +20,7 @@
             android:title="My Friends" />
         <item
             android:id="@+id/nav_rank_list"
-            android:icon="@drawable/ic_rank_list"
+            android:icon="@drawable/ic_star"
             android:title="Rank List" />
     </group>
 

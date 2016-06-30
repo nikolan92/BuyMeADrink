@@ -161,7 +161,23 @@ public class UserHandler {
         jsonObjectRequest.setTag(tag);
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
-
+    public void getUser(String userID,String tag,final VolleyCallBack volleyCallBack){
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.USER_URL+"/"+userID, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onFailed(error.toString());
+            }
+        });
+        jsonObjectRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(jsonObjectRequest);
+    }
     public static void getUserStatic(Context context,String userID,String tag,final VolleyCallBack volleyCallBack){
         VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.USER_URL+"/"+userID, null, new Response.Listener<JSONObject>() {

@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity
     private GoogleMap mMap;
     private HashMap<String,Marker> markers;
     private HashMap<String,String> friends_names;
+    private HashMap<Marker,String> markerOnClick;
     private Marker currentLocation;
 
     //Service var
@@ -117,6 +118,7 @@ public class MainActivity extends AppCompatActivity
 
         markers = new HashMap<>();
         friends_names = new HashMap<>();
+        markerOnClick = new HashMap<>();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -139,6 +141,7 @@ public class MainActivity extends AppCompatActivity
         locationPermission();
         if(locationPermission)
             bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
+
     }
 
     @Override
@@ -156,7 +159,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-
         userHandler.cancelAllRequestWithTag(REQUEST_TAG);
         if(locationPermission) {
             unregisterReceiver(updateMapReceiver);
@@ -387,6 +389,17 @@ public class MainActivity extends AppCompatActivity
         //markerOptions.
         //animateMarker(m,new LatLng(44.5,23.5),new LatLngInterpolator.Linear());
 
+        //setOnInfoWindowClick listener
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent intent = new Intent(MainActivity.this,FriendProfileActivity.class);
+                intent.putExtra("friendID",markerOnClick.get(marker));
+                startActivity(intent);
+            }
+        });
+
+
     }
     private void animateMarker(final Marker marker, final LatLng newLocation,final LatLngInterpolator latLngInterpolator){
 
@@ -428,9 +441,10 @@ public class MainActivity extends AppCompatActivity
             Bitmap icon = ((BitmapDrawable)userImage.getDrawable()).getBitmap();
             Bitmap smallIcon = Bitmap.createScaledBitmap(icon,100,100,false);//
             MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(smallIcon));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
 
             currentLocation = mMap.addMarker(markerOptions);
+            markerOnClick.put(currentLocation,user.getId());
         }else{
             animateMarker(currentLocation,new LatLng(location.getLat(),location.getLng()),new LatLngInterpolator.Linear());
         }
@@ -444,23 +458,27 @@ public class MainActivity extends AppCompatActivity
         if(friends_names.isEmpty())
             return;
 
-        //this do only first time, if markers is set then just update markers location
+        //this do only first time, if markers is set then just update markers location (else branch)
         if(markers.isEmpty()) {
             for (int i = 0; i < friends_location.size(); i++) {
                 LatLng latLng = new LatLng(friends_location.get(i).getLat(), friends_location.get(i).getLng());
                 String friendID = friends_location.get(i).getObjectId();
-
-                //TODO:Make user profileActivity and set action on click on this marker
 
                 MarkerOptions markerOptions = new MarkerOptions()
                         .position(latLng)
                         .title(friends_names.get(friendID))//set friend name in title
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_friend));
 
-                markers.put(friendID, mMap.addMarker(markerOptions));
+                //this is necessary for onInfoWindowClick
+                Marker marker = mMap.addMarker(markerOptions);
+                markerOnClick.put(marker,friends_location.get(i).getObjectId());
+                //this is necessary for later update -friend icon(once) and his location on every change
+                markers.put(friendID, marker);
+
                 //make request for image
                 userHandler.getUserImageInBitmap(friends_location.get(i).getObjectId(), REQUEST_TAG, new GetFriendsBitmapListener(this,friendID));
             }
+            Log.i(LOG_TAG,"Friends placed on the map, for the first time.");
         }else{
             for (int i = 0; i < friends_location.size(); i++) {
                 String friendID = friends_location.get(i).getObjectId();
