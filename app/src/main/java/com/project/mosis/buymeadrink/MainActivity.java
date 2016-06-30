@@ -130,6 +130,11 @@ public class MainActivity extends AppCompatActivity
         //because of line below app can crash because in some situations maybe application don't start splash screen activity or (login or register)
         //SplashScreenActivity setting up user var and if is not called then user will not be set and will be null, that's a problem!
         user = ((MyAplication) MainActivity.this.getApplication()).getUser();
+        //in that case we need to load user from shared preferences
+        if(user == null){
+            user = SaveSharedPreference.GetUser(this);
+        }
+        
         //restore serviceSettings
         leaveServiceOnAfterDestroy = ((MyAplication) MainActivity.this.getApplication()).getServiceSettings();
 
