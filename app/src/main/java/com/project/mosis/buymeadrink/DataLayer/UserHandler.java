@@ -17,6 +17,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.google.gson.Gson;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
+import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBackBitmap;
 import com.project.mosis.buymeadrink.R;
 import com.project.mosis.buymeadrink.Utils.Constants;
 import com.project.mosis.buymeadrink.Utils.VolleyHelperSingleton;
