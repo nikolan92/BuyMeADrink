@@ -31,16 +31,18 @@ public class SplashScreenActivity extends AppCompatActivity {
                 if(user == null)
                 {
                     startActivity(new Intent(SplashScreenActivity.this,LogInActivity.class));
-                    //TODO: set sharedPreference in logIn activity if is login succesful
+                    //TODO: set sharedPreference in logIn activity if is login successful
                     //TODO: after success login set user var with ((MyApplication) this.getApplication()).setSomeVariable("foo");
-                    //example
-//                    SaveSharedPreference.SetUser(SplashScreenActivity.this,"someId");
+
                     finish();
                 }else{
+                    //restore service settings, and set as global var
+                    boolean serviceSettings = SaveSharedPreference.getServiceSettings(SplashScreenActivity.this);
+                    ((MyAplication) SplashScreenActivity.this.getApplication()).setServiceSetings(serviceSettings);
 
-                    //TODO: send request to server or SqlLite database to get user info, then call ((MyApplication) this.getApplication()).setSomeVariable("foo");
+                    //set user as global var
                     ((MyAplication) SplashScreenActivity.this.getApplication()).setUser(user);
-                    //dummy data
+
                     startActivity(new Intent(SplashScreenActivity.this,MainActivity.class));
                     finish();
                 }

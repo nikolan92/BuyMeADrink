@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -19,20 +20,19 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.TextView;
-
-
+import android.widget.Toast;
 import com.android.volley.toolbox.NetworkImageView;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity
         }
     };
     private boolean locationPermission = false;
+    private boolean leaveServiceOnAfterDestroy = true;
     //End of Service
 
     @Override
@@ -123,11 +124,15 @@ public class MainActivity extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         mSearchView = (FloatingSearchView)findViewById(R.id.floating_search_view);
 
+        //because of line below app can crash because in some situations maybe application don't start splash screen activity or (login or register)
+        //SplashScreenActivity setting up user var and if is not called then user will not be set and will be null, that's a problem!
         user = ((MyAplication) MainActivity.this.getApplication()).getUser();
+        //restore serviceSettings
+        leaveServiceOnAfterDestroy = ((MyAplication) MainActivity.this.getApplication()).getServiceSettings();
+
         userHandler = new UserHandler(this);
 
         //load friends info
@@ -139,6 +144,7 @@ public class MainActivity extends AppCompatActivity
 
         //Request permission
         locationPermission();
+
         //TEST_TAG
         //if(locationPermission)
             //bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
@@ -173,9 +179,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //TEST_TAG
-        //if(locationPermission)
-        //    unbindService(mConnection);
+        //Stop service if user say so
+        if(!leaveServiceOnAfterDestroy)
+            stopService(new Intent(this, LocationService.class));
+        //TEST TAG
+//        if(locationPermission)
+//            unbindService(mConnection);
     }
 
     @Override
@@ -236,6 +245,64 @@ public class MainActivity extends AppCompatActivity
                 mSearchView.setLeftMenuOpen(false);
             }
         });
+
+        View switchView = navigationView.getMenu().findItem(R.id.nav_service).getActionView();
+        SwitchCompat mSwitch = (SwitchCompat) switchView.findViewById(R.id.service_switcher);
+
+        mSwitch.setChecked(leaveServiceOnAfterDestroy);
+        mSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SwitchCompat mSwitch = (SwitchCompat) v;
+                if(mSwitch.isChecked()){
+                    //turn service on after destroy without question
+                    serviceSwitcher(true);
+                }else{
+                    //if user want to turn service off then show dialog
+                    serviceSettingsDialog(v);
+                }
+            }
+        });
+    }
+    private void serviceSettingsDialog(final View serviceSwitcher){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("If your turn off this service your friends won't be able to see your exact location on the map, during the inactivity of the application.");
+
+        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                //turn service off after destroy
+                serviceSwitcher(false);
+            }
+        });
+
+        alertDialogBuilder.setNegativeButton("No",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                SwitchCompat mSwitch = (SwitchCompat) serviceSwitcher;
+                //recheck service switcher on again
+                mSwitch.setChecked(true);
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+    //serviceSwitcher
+    public void serviceSwitcher(boolean isChecked){
+        if(isChecked){
+            //TODO:Save shared preferences (service running normally)
+            SaveSharedPreference.SetServiceSettings(this,true);
+            leaveServiceOnAfterDestroy = true;
+        }else{
+            //TODO:Save shared preferences (stop service after activity destroy)
+            SaveSharedPreference.SetServiceSettings(this,false);
+            leaveServiceOnAfterDestroy = false;
+        }
+        Toast.makeText(MainActivity.this, isChecked?"Service turned on.":"Service turned off.", Toast.LENGTH_SHORT).show();
+
     }
     private void loadUser(){
         userHandler.getUserImage(user.getId(),userImage);
@@ -263,7 +330,7 @@ public class MainActivity extends AppCompatActivity
             //Test
             startActivity(new Intent(this,FriendProfileActivity.class));
 
-        } else if (id == R.id.nav_setings) {
+        } else if (id == R.id.nav_service) {
             /**
              * Now here all we need to do is to make variable to our static class and make new one, then pass to the userHanler
             * */
@@ -307,7 +374,7 @@ public class MainActivity extends AppCompatActivity
      * */
     private void locationPermission() {
         if(Build.VERSION.SDK_INT<23){
-            locationPermission =true;
+            locationPermission = true;
             startService(new Intent(this, LocationService.class));
         }else{
             if(checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED

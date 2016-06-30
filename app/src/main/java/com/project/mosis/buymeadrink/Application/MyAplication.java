@@ -12,6 +12,14 @@ import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 public class MyAplication extends Application{
 
     private User user=null;
+    private boolean serviceSettings = true;
+
+    public boolean getServiceSettings(){
+        return serviceSettings;
+    }
+    public void setServiceSetings(boolean serviceSettings){
+        this.serviceSettings = serviceSettings;
+    }
 
     public User getUser(){
         return this.user;
