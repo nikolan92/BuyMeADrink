@@ -22,9 +22,9 @@ public class SplashScreenActivity extends AppCompatActivity {
         ImageView imageView = (ImageView) findViewById(R.id.logo_splash_screen);
         assert imageView != null;
 
-        Handler handler = new Handler();
+        final Handler handler = new Handler();
 
-        handler.postDelayed(new Runnable() {
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 User user = SaveSharedPreference.GetUser(SplashScreenActivity.this);
@@ -45,6 +45,6 @@ public class SplashScreenActivity extends AppCompatActivity {
                     finish();
                 }
             }
-        }, 400);
+        });
     }
 }

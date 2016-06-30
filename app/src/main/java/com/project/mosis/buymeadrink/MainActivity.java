@@ -139,8 +139,9 @@ public class MainActivity extends AppCompatActivity
 
         //Request permission
         locationPermission();
-        if(locationPermission)
-            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
+        //TEST_TAG
+        //if(locationPermission)
+            //bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
 
     }
 
@@ -153,6 +154,8 @@ public class MainActivity extends AppCompatActivity
             intentFilter.addAction(LocationService.ACTION_UPDATE_FRIENDS_LOCATIONS);
             intentFilter.addAction(LocationService.ACTION_UPDATE_MY_LOCATION);
             registerReceiver(updateMapReceiver,intentFilter);
+            //TEST_TAG
+            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
         }
     }
 
@@ -162,14 +165,17 @@ public class MainActivity extends AppCompatActivity
         userHandler.cancelAllRequestWithTag(REQUEST_TAG);
         if(locationPermission) {
             unregisterReceiver(updateMapReceiver);
+            //TEST_TAG
+            unbindService(mConnection);
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(locationPermission)
-            unbindService(mConnection);
+        //TEST_TAG
+        //if(locationPermission)
+        //    unbindService(mConnection);
     }
 
     @Override
@@ -377,17 +383,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        // Add a marker in Sydney, Australia, and move the camera.
-        //LatLng sydney = new LatLng(44.0, 23);
-        //MarkerOptions markerOptions = new MarkerOptions().position(sydney).title("Marker in Sydney");
-        //Marker m = mMap.addMarker(markerOptions);
-
-        //m.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_user_image));//moze kasnije dodavanje ikone
-
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(44.5,23.5),9));
-        //markerOptions.
-        //animateMarker(m,new LatLng(44.5,23.5),new LatLngInterpolator.Linear());
 
         //setOnInfoWindowClick listener
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
