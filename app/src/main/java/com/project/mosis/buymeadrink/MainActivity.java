@@ -48,7 +48,6 @@ import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.ObjectLocation;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
-import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBackBitmap;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 import com.project.mosis.buymeadrink.SearchResultData.SearchResult;
 import com.project.mosis.buymeadrink.Service.LocationService;
