@@ -103,7 +103,6 @@
                 android:textColor="#727272" />
 
         </RelativeLayout>
-        <include layout="@layout/item_divider" />
     </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>

@@ -40,7 +40,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
                     //TODO: send request to server or SqlLite database to get user info, then call ((MyApplication) this.getApplication()).setSomeVariable("foo");
                     ((MyAplication) SplashScreenActivity.this.getApplication()).setUser(user);
-                    //dummydata
+                    //dummy data
                     startActivity(new Intent(SplashScreenActivity.this,MainActivity.class));
                     finish();
                 }
