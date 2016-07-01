@@ -43,7 +43,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.project.mosis.buymeadrink.Application.MyAplication;
+import com.project.mosis.buymeadrink.Application.MyApplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.ObjectLocation;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
@@ -129,14 +129,14 @@ public class MainActivity extends AppCompatActivity
 
         //because of line below app can crash because in some situations maybe application don't start splash screen activity or (login or register)
         //SplashScreenActivity setting up user var and if is not called then user will not be set and will be null, that's a problem!
-        user = ((MyAplication) MainActivity.this.getApplication()).getUser();
+        user = ((MyApplication) MainActivity.this.getApplication()).getUser();
         //in that case we need to load user from shared preferences
         if(user == null){
             user = SaveSharedPreference.GetUser(this);
         }
-        
+
         //restore serviceSettings
-        leaveServiceOnAfterDestroy = ((MyAplication) MainActivity.this.getApplication()).getServiceSettings();
+        leaveServiceOnAfterDestroy = ((MyApplication) MainActivity.this.getApplication()).getServiceSettings();
 
         userHandler = new UserHandler(this);
 
@@ -269,6 +269,54 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
+    private void loadUser(){
+        userHandler.getUserImage(user.getId(),userImage);
+        assert nameInput != null;
+        nameInput.setText(user.getName());
+        assert emailInput != null;
+        emailInput.setText(user.getEmail());
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_add_question) {
+            startActivity(new Intent(this,AddQuestionActivity.class));
+        } else if (id == R.id.nav_my_profile) {
+            startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
+        } else if (id == R.id.nav_add_friend) {
+
+            startActivity(new Intent(this, BluetoothActivity.class));
+
+        } else if (id == R.id.nav_my_friends) {
+            //Test
+            startActivity(new Intent(this,FriendProfileActivity.class));
+
+        } else if (id == R.id.nav_log_out) {
+            //Clear Shared Preference and start LogIn again
+            SaveSharedPreference.clearUser(this.getApplicationContext());
+            //start Log in activity and clear back stack
+            startActivity(new Intent(MainActivity.this,LogInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            if(locationPermission) {
+                stopService(new Intent(this, LocationService.class));
+            }
+            finish();
+        } else if(id == R.id.nav_rank_list){
+            startActivity(new Intent(this,UsersRankActivity.class));
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+    /**
+     *Service Settings
+     *=================================================================================================
+     * */
     private void serviceSettingsDialog(final View serviceSwitcher){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage("If your turn off this service your friends won't be able to see your exact location on the map, during the inactivity of the application.");
@@ -295,7 +343,6 @@ public class MainActivity extends AppCompatActivity
         alertDialog.show();
     }
 
-    //serviceSwitcher
     public void serviceSwitcher(boolean isChecked){
         if(isChecked){
             //TODO:Save shared preferences (service running normally)
@@ -309,63 +356,16 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(MainActivity.this, isChecked?"Service turned on.":"Service turned off.", Toast.LENGTH_SHORT).show();
 
     }
-    private void loadUser(){
-        userHandler.getUserImage(user.getId(),userImage);
-        assert nameInput != null;
-        nameInput.setText(user.getName());
-        assert emailInput != null;
-        emailInput.setText(user.getEmail());
-    }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_add_question) {
-
-        } else if (id == R.id.nav_my_profile) {
-            startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
-        } else if (id == R.id.nav_add_friend) {
-
-            startActivity(new Intent(this, BluetoothActivity.class));
-
-        } else if (id == R.id.nav_my_friends) {
-            //Test
-            startActivity(new Intent(this,FriendProfileActivity.class));
-
-        } else if (id == R.id.nav_service) {
-            /**
-             * Now here all we need to do is to make variable to our static class and make new one, then pass to the userHanler
-            * */
-            //final OnLogInListener listener = new OnLogInListener(this);
-
-            //userHandler.logIn("s", "s", "Tag", listener);
-
-        } else if (id == R.id.nav_log_out) {
-            //Clear Shared Preference and start LogIn again
-            SaveSharedPreference.clearUser(this.getApplicationContext());
-            //start Log in activity and clear back stack
-            startActivity(new Intent(MainActivity.this,LogInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-            if(locationPermission) {
-                stopService(new Intent(this, LocationService.class));
-            }
-            finish();
-        } else if(id == R.id.nav_rank_list){
-            startActivity(new Intent(this,UsersRankActivity.class));
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
+    /**
+     *On Activity result
+     *=================================================================================================
+     * */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == USER_PROFILE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
-            user = ((MyAplication)getApplication()).getUser();
+            user = ((MyApplication)getApplication()).getUser();
             loadUser();
             Snackbar.make(drawer,"Profile is successfully updated.",Snackbar.LENGTH_LONG).show();
         }else if(requestCode == SETTINGS_ACTIVITY_REQUEST_CODE)

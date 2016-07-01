@@ -53,7 +53,7 @@ public class LocationService extends Service {
     private ServiceBackgroundThread serviceBackgroundThread;
     private ServiceForegroundThread serviceForegroundThread;
     private final int backgroundThreadRefreshRate= 600000;//10m
-    private final int foregroundThreadRefreshRate= 10000;//15s
+    private final int foregroundThreadRefreshRate= 10000;//10s
     //Location manager and lister
     private LocationManager mLocationManager;
     private MyLocationListener locationListener;

@@ -4,11 +4,9 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
-import com.project.mosis.buymeadrink.Application.MyAplication;
+import com.project.mosis.buymeadrink.Application.MyApplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 
@@ -38,10 +36,10 @@ public class SplashScreenActivity extends AppCompatActivity {
                 }else{
                     //restore service settings, and set as global var
                     boolean serviceSettings = SaveSharedPreference.getServiceSettings(SplashScreenActivity.this);
-                    ((MyAplication) SplashScreenActivity.this.getApplication()).setServiceSetings(serviceSettings);
+                    ((MyApplication) SplashScreenActivity.this.getApplication()).setServiceSetings(serviceSettings);
 
                     //set user as global var
-                    ((MyAplication) SplashScreenActivity.this.getApplication()).setUser(user);
+                    ((MyApplication) SplashScreenActivity.this.getApplication()).setUser(user);
 
                     startActivity(new Intent(SplashScreenActivity.this,MainActivity.class));
                     finish();

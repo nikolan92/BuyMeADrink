@@ -16,7 +16,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.project.mosis.buymeadrink.Application.MyAplication;
+import com.project.mosis.buymeadrink.Application.MyApplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
@@ -97,7 +97,7 @@ public class RegisterActivity extends AppCompatActivity {
                 name = (name.equals(""))?user.getName():name;//case when user don't enter fullName
 
                 //set just logged user as global variable (this var live together with app)
-                ((MyAplication) RegisterActivity.this.getApplication()).setUser(user);
+                ((MyApplication) RegisterActivity.this.getApplication()).setUser(user);
 
                 //store user in local storage with sharedPreference
                 SaveSharedPreference.SetUser(RegisterActivity.this,user);

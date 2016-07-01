@@ -25,11 +25,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.NetworkImageView;
-import com.project.mosis.buymeadrink.Application.MyAplication;
+import com.project.mosis.buymeadrink.Application.MyApplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
@@ -69,8 +68,8 @@ public class UserProfileActivity extends AppCompatActivity {
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.user_profile_coordinator_layout);
 
-        user = ((MyAplication) this.getApplication()).getUser();
-        //I making new user because i need copy of user, not a reference. Real user object is stored in MyAplication class and its global for all activity
+        user = ((MyApplication) this.getApplication()).getUser();
+        //I making new user because i need copy of user, not a reference. Real user object is stored in MyApplication class and its global for all activity
         //so i can't change that object until everything is success
         updatedUser = new User(user.getId(),user.getName(),user.getEmail(),user.getPassword(),user.getFriends(),user.getRating());
         userHandler = new UserHandler(this);
@@ -332,7 +331,7 @@ public class UserProfileActivity extends AppCompatActivity {
         try {
             if (result.getBoolean("Success")) {
                 //Set new user as global
-                ((MyAplication)this.getApplication()).setUser(updatedUser);
+                ((MyApplication)this.getApplication()).setUser(updatedUser);
                 //Saving new User on storage for future use
                 SaveSharedPreference.SetUser(this,updatedUser);
                 progressDialog.dismiss();
