@@ -173,11 +173,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        restoreCurrentLocation();
-    }
 
     @Override
     protected void onStop() {
@@ -490,6 +485,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+        restoreCurrentLocation();
     }
     private void animateMarker(final Marker marker, final LatLng newLocation,final LatLngInterpolator latLngInterpolator){
 
@@ -542,8 +538,6 @@ public class MainActivity extends AppCompatActivity
     //speed up showing user location after user return from some activity because MainActivity lost all markers when
     // user goes in some other activity actually MainActivity again go through onCreate method
     private void restoreCurrentLocation(){
-        if(mMap==null)
-            return;
         if(globalCurrentLocation==null){
             return;
         }
