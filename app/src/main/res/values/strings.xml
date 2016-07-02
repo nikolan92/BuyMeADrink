@@ -23,8 +23,24 @@
     <string name="act_name_register">Register</string>
     <string name="act_name_log_in">Log in</string>
 
-    <string name="action_settings">Setings</string>
+    <string name="action_settings">Settings</string>
     <string name="err_msg_old_password">Your old password is not correct!</string>
     <string name="no_data">No data</string>
     <string name="rating">Rating</string>
+
+    <string name="add_question_category">Category:</string>
+    <string name="add_question_add">Add</string>
+    <string name="add_question_answer_a">Answer A</string>
+    <string name="add_question_answer_b">Answer B</string>
+    <string name="add_question_answer_c">Answer C</string>
+    <string name="add_question_answer_d">Answer D</string>
+    <string name="add_question_question">Question</string>
+
+    <string name="add_question_err_msg_empty_input">Enter Answer</string>
+    <string-array name="add_question_category_array">
+        <item>Geography</item>
+        <item>Physics</item>
+        <item>Computer science</item>
+        <item>Math</item>
+    </string-array>
 </resources>

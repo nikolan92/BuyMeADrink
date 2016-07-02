@@ -8,5 +8,7 @@ public final class Constants {
     public static final String USER_FRIENDS_URL = HOST + "/api/user/friends/";
     public static final String USER_IMAGE_URL = HOST + "/images/users/";
 
+    public static final String QUESTION_URL = HOST + "/api/question";
+
     public static final String UPDATE_LOCATION = HOST + "/api/updateLocation";
 }

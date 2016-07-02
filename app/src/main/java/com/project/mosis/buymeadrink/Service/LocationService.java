@@ -53,7 +53,7 @@ public class LocationService extends Service {
     private ServiceBackgroundThread serviceBackgroundThread;
     private ServiceForegroundThread serviceForegroundThread;
     private final int backgroundThreadRefreshRate= 600000;//10m
-    private final int foregroundThreadRefreshRate= 10000;//10s
+    private final int foregroundThreadRefreshRate= 6000;//6s
     //Location manager and lister
     private LocationManager mLocationManager;
     private MyLocationListener locationListener;
@@ -61,7 +61,7 @@ public class LocationService extends Service {
     private int range = 100;//this is range for notification
     //GPS parameters
     private float minDistance = (float) 1.5;//1.5m
-    private int minTime = 30000;//30s
+    private int minTime = 15000;//15s
     //last updated location location
     private double lat=0,lng=0;
     private boolean coordinatesIsReady = false;

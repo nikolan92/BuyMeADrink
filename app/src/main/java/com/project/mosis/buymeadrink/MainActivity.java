@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity
         userHandler = new UserHandler(this);
 
         //load friends info
-        userHandler.getUserFriends(REQUEST_TAG,user.getId(),new GetFriendsInfoListener(this));
+        userHandler.getUserFriends(user.getId(),REQUEST_TAG,new GetFriendsInfoListener(this));
 
         setupFloatingSearch();
         setupDrawer();//Drawer will setup NavigationView header for userInfo
@@ -338,6 +338,14 @@ public class MainActivity extends AppCompatActivity
                 mSwitch.setChecked(true);
             }
         });
+        alertDialogBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                SwitchCompat mSwitch = (SwitchCompat) serviceSwitcher;
+                //recheck service switcher on again
+                mSwitch.setChecked(true);
+            }
+        });
 
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
@@ -506,7 +514,7 @@ public class MainActivity extends AppCompatActivity
         if(currentLocation==null){
             LatLng latLng = new LatLng(location.getLat(),location.getLng());
             Bitmap icon = ((BitmapDrawable)userImage.getDrawable()).getBitmap();
-            Bitmap smallIcon = Bitmap.createScaledBitmap(icon,100,100,false);//
+            Bitmap smallIcon = Bitmap.createScaledBitmap(icon,100,100,false);//Sony xperia mini 40x40
             MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(smallIcon));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
 

@@ -31,6 +31,8 @@ public class UserHandler {
     private VolleyHelperSingleton mVolleyHelper;
     private Handler mHandler = null;
 
+    private final String LOG_TAG = "UserHandler";
+
     public UserHandler(Context context){
 
         this.mVolleyHelper = VolleyHelperSingleton.getInstance(context);
@@ -95,7 +97,7 @@ public class UserHandler {
         try {
             jsonData = new JSONObject(new Gson().toJson(newUser));
         }catch (JSONException exception){
-            Log.e("UserHandler",exception.toString());
+            Log.e(LOG_TAG,exception.toString());
         }
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, Constants.USER_URL, jsonData, new Response.Listener<JSONObject>() {
             @Override
@@ -144,7 +146,7 @@ public class UserHandler {
         mVolleyHelper.addToRequestQueue(imageRequest);
     }
     //Return all friends of user with given id.
-    public void getUserFriends(String tag, String userID, final VolleyCallBack volleyCallBack){
+    public void getUserFriends(String userID,String tag, final VolleyCallBack volleyCallBack){
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.USER_FRIENDS_URL+userID, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -232,10 +234,10 @@ public class UserHandler {
     }
     public void cancelAllRequestWithTag(String tag){
         mVolleyHelper.cancelPendingRequests(tag);
-        if(mHandler!=null){
-            //mHandler.removeCallbacks(null);
-        }
-        //TODO: When activity call onStop() this function must be caled because if you not call this fun Volley will call your handler and app will crash
+//        if(mHandler!=null){
+//            //mHandler.removeCallbacks(null);
+//        }
+        //TODO: When activity call onStop() this function must be called because if you not call this fun Volley will call your handler and app will crash
     }
     public static void CancelAllRequestWithTagStatic(Context context,String tag){
         VolleyHelperSingleton mVolleyHelper = VolleyHelperSingleton.getInstance(context);
@@ -267,7 +269,7 @@ public class UserHandler {
                 jsonData = new JSONObject(new Gson().toJson(user));
                 jsonData.put("image_base64",base64);
             }catch (JSONException exception){
-                Log.e("UserHandler",exception.toString());
+                Log.e(LOG_TAG,exception.toString());
             }
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, Constants.USER_URL, jsonData, new Response.Listener<JSONObject>() {
                 @Override

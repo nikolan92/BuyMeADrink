@@ -77,6 +77,10 @@ public class UserProfileActivity extends AppCompatActivity {
         setupInput();
         loadUserInfo(user);
     }
+    /**
+     *Layout Setup
+     *=================================================================================================
+     **/
     private void setupInput(){
         inputLayoutName = (TextInputLayout) findViewById(R.id.user_profile_input_layout_name);
         inputLayoutOldPassword = (TextInputLayout) findViewById(R.id.user_profile_input_layout_old_password);
