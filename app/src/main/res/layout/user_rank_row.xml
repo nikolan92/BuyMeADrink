@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal" android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingBottom="@dimen/abc_action_bar_overflow_padding_start_material"
+              android:paddingTop="@dimen/abc_action_bar_overflow_padding_start_material">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Large Text"
+        android:id="@+id/orderNumber"
+        android:paddingLeft="@dimen/abc_action_bar_overflow_padding_end_material"
+        android:paddingRight="@dimen/abc_action_bar_overflow_padding_end_material"
+        android:layout_marginTop="@dimen/abc_dialog_padding_material" />
+
+    <com.android.volley.toolbox.NetworkImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/profilePicture"
+        android:background="@drawable/elevation_rectange"
+        android:elevation="8dp"
+        android:layout_gravity="center_horizontal" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Large Text"
+            android:id="@+id/name"
+            android:paddingLeft="@dimen/abc_action_bar_overflow_padding_end_material" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Small Text"
+            android:id="@+id/eMail"
+            android:paddingLeft="@dimen/abc_action_bar_overflow_padding_end_material" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Large Text"
+        android:id="@+id/score"
+        android:layout_marginTop="@dimen/abc_dialog_padding_material"
+        android:gravity="right"
+        android:paddingRight="@dimen/abc_action_bar_overflow_padding_end_material" />
+</LinearLayout>

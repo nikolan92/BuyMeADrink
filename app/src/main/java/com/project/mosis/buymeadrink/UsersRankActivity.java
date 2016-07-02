@@ -6,9 +6,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.project.mosis.buymeadrink.Adapters.UsersRankArrayAdapter;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
@@ -33,24 +35,21 @@ public class UsersRankActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         userHandler = new UserHandler(this);
-
-        final Button t = (Button) findViewById(R.id.testbtn);
-        assert t!=null;
-        t.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                userHandler.getAllUsers(REQUEST_TAG,new GetAllUsersListener(UsersRankActivity.this));
-            }
-        });
+        userHandler.getAllUsers(REQUEST_TAG,new GetAllUsersListener(UsersRankActivity.this));
     }
 
 
     /**
      * This function is called when server return all users*/
     private void usersAreReady(ArrayList<User> users){
-        //Test "for"
-        for(int i=0;i<users.size();i++)
-            Log.d("USERS",users.get(i).getName());
+        UsersRankArrayAdapter adapter = new UsersRankArrayAdapter(this, users);
+        ListView lv =(ListView) findViewById(R.id.listView2);
+        lv.setAdapter(adapter);
+
+
+        for(int i=0;i<users.size();i++) {
+            Log.d("USERS", users.get(i).getName());
+        }
     }
 
     //Request to the server, and handle result...

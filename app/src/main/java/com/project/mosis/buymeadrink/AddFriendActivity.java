@@ -12,7 +12,6 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,7 +29,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import java.io.IOException;
 import java.util.UUID;
 
-public class BluetoothActivity extends AppCompatActivity {
+public class AddFriendActivity extends AppCompatActivity {
 
     private final static UUID uuid = UUID.fromString("ab3e7f9c-1b2f-11e5-b60b-1697f925ec7b");
 
@@ -62,7 +61,7 @@ public class BluetoothActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bluetooth);
+        setContentView(R.layout.activity_add_friend);
 
         ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
         assert toggle != null;

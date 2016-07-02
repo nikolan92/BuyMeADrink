@@ -83,8 +83,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+        <!--AddFriendActivity-->
         <activity
-            android:name=".BluetoothActivity"
+            android:name=".AddFriendActivity"
             android:theme="@style/AppTheme"/>
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
         <!-- Mape -->

@@ -299,7 +299,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_my_profile) {
                 startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_add_friend) {
-            startActivity(new Intent(this, BluetoothActivity.class));
+            startActivity(new Intent(this, AddFriendActivity.class));
         } else if (id == R.id.nav_my_friends) {
 
         } else if (id == R.id.nav_log_out) {
