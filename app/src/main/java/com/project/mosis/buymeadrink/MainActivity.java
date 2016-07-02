@@ -43,12 +43,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 import com.project.mosis.buymeadrink.Application.MyApplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.ObjectLocation;
+import com.project.mosis.buymeadrink.DataLayer.DataObject.Question;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBackBitmap;
+import com.project.mosis.buymeadrink.DataLayer.QuestionHandler;
 import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 import com.project.mosis.buymeadrink.SearchResultData.SearchResult;
 import com.project.mosis.buymeadrink.Service.LocationService;
@@ -87,11 +90,13 @@ public class MainActivity extends AppCompatActivity
     //User
     private UserHandler userHandler;
     private User user;
+    //Question
+    private QuestionHandler questionHandler;
     //Map
     private GoogleMap mMap;
     private HashMap<String,Marker> markers;
     private HashMap<String,String> friends_names;
-    private HashMap<Marker,String> markerOnClick;
+    private HashMap<Marker,MyMarker> markerOnClick;
     private Marker currentLocation;
     private LatLng globalCurrentLocation;
     //Service vars
@@ -143,9 +148,11 @@ public class MainActivity extends AppCompatActivity
         leaveServiceOnAfterDestroy = ((MyApplication) MainActivity.this.getApplication()).getServiceSettings();
 
         userHandler = new UserHandler(this);
-
         //load friends info
         userHandler.getUserFriends(user.getId(),REQUEST_TAG,new GetFriendsInfoListener(this));
+        //get all questions
+        questionHandler = new QuestionHandler(this);
+        questionHandler.getAllQuestions(REQUEST_TAG,new GetAllQuestionsListener(this));
 
         setupFloatingSearch();
         setupDrawer();//Drawer will setup NavigationView header for userInfo
@@ -308,6 +315,8 @@ public class MainActivity extends AppCompatActivity
             myFriendsListIntent.putExtra("userID",user.getId());
             startActivity(myFriendsListIntent);
         } else if (id == R.id.nav_log_out) {
+            //clear last know globalCurrentLocation
+            ((MyApplication) this.getApplication()).setCurrentLocation(null);
             //Clear Shared Preference and start LogIn again
             SaveSharedPreference.clearUser(this.getApplicationContext());
             //start Log in activity and clear back stack
@@ -477,13 +486,18 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+
         //setOnInfoWindowClick listener
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Intent intent = new Intent(MainActivity.this,FriendProfileActivity.class);
-                intent.putExtra("friendID",markerOnClick.get(marker));
-                startActivity(intent);
+                if(markerOnClick.get(marker).isItUserMarker()) {
+                    Intent intent = new Intent(MainActivity.this, FriendProfileActivity.class);
+                    intent.putExtra("friendID", markerOnClick.get(marker).getID());
+                    startActivity(intent);
+                }else{
+                    //TODO:Start question answer dialog
+                }
             }
         });
         restoreCurrentLocation();
@@ -531,16 +545,16 @@ public class MainActivity extends AppCompatActivity
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
 
             currentLocation = mMap.addMarker(markerOptions);
-            markerOnClick.put(currentLocation,user.getId());
-
+            markerOnClick.put(currentLocation,new MyMarker(user.getId(),true));
 
             ((MyApplication) this.getApplication()).setCurrentLocation(latLng);
         }else{
             animateMarker(currentLocation,new LatLng(location.getLat(),location.getLng()),new LatLngInterpolator.Linear());
+            ((MyApplication) this.getApplication()).setCurrentLocation(new LatLng(location.getLat(),location.getLng()));
         }
     }
     //speed up showing user location after user return from some activity because MainActivity lost all markers when
-    // user goes in some other activity actually MainActivity again go through onCreate method
+    // user goes in some other activity, actually MainActivity again go through onCreate method. (in some cases)
     private void restoreCurrentLocation(){
         if(globalCurrentLocation==null){
             return;
@@ -552,7 +566,7 @@ public class MainActivity extends AppCompatActivity
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(globalCurrentLocation,18));
 
             currentLocation = mMap.addMarker(markerOptions);
-            markerOnClick.put(currentLocation,user.getId());
+            markerOnClick.put(currentLocation,new MyMarker(user.getId(),true));
         }
     }
 
@@ -577,7 +591,7 @@ public class MainActivity extends AppCompatActivity
 
                 //this is necessary for onInfoWindowClick
                 Marker marker = mMap.addMarker(markerOptions);
-                markerOnClick.put(marker,friends_location.get(i).getObjectId());
+                markerOnClick.put(marker,new MyMarker(friends_location.get(i).getObjectId(),true));
                 //this is necessary for later update -friend icon(once) and his location on every change
                 markers.put(friendID, marker);
 
@@ -592,6 +606,19 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
+    private void showQuestions(ArrayList<Question> questions){
+        for(int i=0;i<questions.size();i++){
+            LatLng latLng = new LatLng(questions.get(i).getLat(),questions.get(i).getLng());
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(latLng)
+                    .title(questions.get(i).getQuestion())//set friend name in title
+                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_question_mark));
+            Marker marker = mMap.addMarker(markerOptions);
+
+            markerOnClick.put(marker,new MyMarker(questions.get(i).getID(),false));
+        }
+    }
     /**
      *
      *EXAMPLE:For UserHandler use
@@ -604,11 +631,11 @@ public class MainActivity extends AppCompatActivity
 
         try{
             if(result.getBoolean("Success")){
-                JSONArray friendsInJson = result.getJSONArray("Data");
+                JSONArray friendsInJsonArray = result.getJSONArray("Data");
 
-                for(int i=0;i<friendsInJson.length();i++)
+                for(int i=0;i<friendsInJsonArray.length();i++)
                 {
-                    JSONObject friendInJson = (JSONObject) friendsInJson.get(i);
+                    JSONObject friendInJson = (JSONObject) friendsInJsonArray.get(i);
                     //fill hash map with friends name
                     friends_names.put(friendInJson.getString("_id"),friendInJson.getString("name"));
                     //Log.i(LOG_TAG,friendInJson.toString());
@@ -628,7 +655,27 @@ public class MainActivity extends AppCompatActivity
         Marker marker = markers.get(friendID);
         marker.setIcon(BitmapDescriptorFactory.fromBitmap(image));
     }
+    public void onQuestionsReady(JSONObject result){
+        ArrayList<Question> questions = new ArrayList<>();
+        try{
+            if(result.getBoolean("Success")){
+                JSONArray questionsInJsonArray = result.getJSONArray("Data");
 
+                for(int i=0;i<questionsInJsonArray.length();i++)
+                {
+                    JSONObject questionInJson = (JSONObject) questionsInJsonArray.get(i);
+                    questions.add(new Gson().fromJson(questionInJson.toString(),Question.class));
+                }
+
+            }else{
+                Log.e(LOG_TAG,result.getString("Error"));
+            }
+        }catch (JSONException exception)
+        {
+            Log.e(LOG_TAG,exception.toString());
+        }
+        showQuestions(questions);
+    }
     /**
      * Static inner classes do not hold an implicit reference to their outer classes, so activity will not be leaked.
      * Also because i need to access to an activity method i need to hold a reference to it. But i keep weakReference,
@@ -676,19 +723,40 @@ public class MainActivity extends AppCompatActivity
                 Log.e(mainActivity.LOG_TAG,error);
         }
     }
+
+    private static class GetAllQuestionsListener implements VolleyCallBack{
+
+        private final WeakReference<MainActivity> mActivity;
+        GetAllQuestionsListener(MainActivity mainActivity){
+            mActivity = new WeakReference<>(mainActivity);
+        }
+        @Override
+        public void onSuccess(JSONObject result) {
+            MainActivity mainActivity = mActivity.get();
+            if(mainActivity!=null)//If activity still exist then do some job, if not just return;
+                mainActivity.onQuestionsReady(result);
+        }
+
+        @Override
+        public void onFailed(String error) {
+            MainActivity mainActivity = mActivity.get();
+            if(mainActivity!=null)//If activity still exist then do some job, if not just return;
+                Log.e(mainActivity.LOG_TAG,error);
+        }
+    }
     private class MyMarker {
         private String _id;
-        private boolean isItFriend;
+        private boolean isItFriendMarker;
 
         MyMarker(String _id,boolean isItFriend){
             this._id = _id;
-            this.isItFriend = isItFriend;
+            this.isItFriendMarker = isItFriend;
         }
         public String getID(){
             return _id;
         }
-        public boolean isItFriend(){
-            return isItFriend;
+        public boolean isItUserMarker(){
+            return isItFriendMarker;
         }
     }
 }

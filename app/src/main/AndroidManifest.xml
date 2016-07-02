@@ -80,6 +80,7 @@
         <!-- AddQuestionActivity -->
         <activity
             android:name=".AddQuestionActivity"
+            android:label="Add Question"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -93,6 +94,7 @@
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
         <!--FriendsListActivity-->
         <activity android:name=".FriendsListActivity"
+                  android:label="My Friends"
                   android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
