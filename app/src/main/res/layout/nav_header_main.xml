@@ -16,7 +16,7 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:id="@+id/nav_user_image"
-        android:background="@drawable/elevation_rectange"
+        android:background="@drawable/elevation_rectangle"
         android:elevation="8dp"/>
     <!--android:paddingTop="@dimen/nav_header_vertical_spacing"-->
 

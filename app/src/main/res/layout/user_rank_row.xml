@@ -19,8 +19,8 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:id="@+id/profilePicture"
-        android:background="@drawable/elevation_rectange"
-        android:elevation="8dp"
+        android:background="@drawable/elevation_rectangle"
+        android:elevation="4dp"
         android:layout_gravity="center_horizontal" />
 
     <LinearLayout

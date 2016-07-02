@@ -31,7 +31,7 @@
                     android:layout_width="180dp"
                     android:layout_height="180dp"
                     android:id="@+id/user_profile_imageView"
-                    android:background="@drawable/elevation_rectange"
+                    android:background="@drawable/elevation_rectangle"
                     android:elevation="8dp"
                     android:layout_gravity="center_horizontal" />
 
