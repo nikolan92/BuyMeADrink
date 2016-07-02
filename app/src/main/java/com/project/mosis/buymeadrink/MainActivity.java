@@ -137,7 +137,8 @@ public class MainActivity extends AppCompatActivity
             user = SaveSharedPreference.GetUser(this);
         }
 
-        globalCurrentLocation = ((MyApplication) MainActivity.this.getApplication()).getCurrentLocation();
+        //speed up restoring user current location
+        globalCurrentLocation = ((MyApplication) this.getApplication()).getCurrentLocation();
         //restore serviceSettings
         leaveServiceOnAfterDestroy = ((MyApplication) MainActivity.this.getApplication()).getServiceSettings();
 
@@ -531,6 +532,9 @@ public class MainActivity extends AppCompatActivity
 
             currentLocation = mMap.addMarker(markerOptions);
             markerOnClick.put(currentLocation,user.getId());
+
+
+            ((MyApplication) this.getApplication()).setCurrentLocation(latLng);
         }else{
             animateMarker(currentLocation,new LatLng(location.getLat(),location.getLng()),new LatLngInterpolator.Linear());
         }
