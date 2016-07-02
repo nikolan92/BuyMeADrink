@@ -4,6 +4,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ListView;
 
@@ -31,10 +32,15 @@ public class FriendsListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_friends_list);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.friend_list_coordinator_layout);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.friend_list_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         Bundle bundle = getIntent().getExtras();
         if(bundle!=null) {
+            String userId = bundle.getString("userID");
             userHandler = new UserHandler(this);
-            //userHandler.getUserFriends(REQUEST_TAG, new GetAllUsersListener(FriendsListActivity.this));
+            userHandler.getUserFriends(userId,REQUEST_TAG, new GetAllUsersListener(FriendsListActivity.this));
         }
     }
     @Override

@@ -24,7 +24,6 @@ public class FriendProfileActivity extends AppCompatActivity {
     private final String LOG_TAG = "FriendProfileActivity";
     private UserHandler userHandler;
     //Layout
-    private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private CoordinatorLayout coordinatorLayout;
     private TextView emailInput,rationInput;
@@ -32,14 +31,16 @@ public class FriendProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend_profile);
-        toolbar = (Toolbar) findViewById(R.id.friend_profile_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.friend_profile_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.friend_profile_toolbar_layout);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.friend_profile_coordinator_layout);
 
         emailInput = (TextView)findViewById(R.id.friend_profile_email);
         rationInput = (TextView)findViewById(R.id.friend_profile_rating);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         NetworkImageView friendImage = (NetworkImageView) findViewById(R.id.friend_profile_imageView);
 
         collapsingToolbarLayout.setTitle("No data");

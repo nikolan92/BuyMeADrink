@@ -301,7 +301,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_add_friend) {
             startActivityForResult(new Intent(this, AddFriendActivity.class),ADD_FRIEND_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_my_friends) {
-            //Intent myFriendsListIntetn = new Intent(this,)
+            Intent myFriendsListIntent = new Intent(this,FriendsListActivity.class);
+            myFriendsListIntent.putExtra("userID",user.getId());
+            startActivity(myFriendsListIntent);
         } else if (id == R.id.nav_log_out) {
             //Clear Shared Preference and start LogIn again
             SaveSharedPreference.clearUser(this.getApplicationContext());
@@ -481,8 +483,6 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
-
-
     }
     private void animateMarker(final Marker marker, final LatLng newLocation,final LatLngInterpolator latLngInterpolator){
 
