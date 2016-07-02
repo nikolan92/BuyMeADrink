@@ -1,5 +1,7 @@
 package com.project.mosis.buymeadrink;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
@@ -13,7 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.project.mosis.buymeadrink.DataLayer.DataObject.Question;
 import com.project.mosis.buymeadrink.DataLayer.EventListeners.VolleyCallBack;
@@ -27,13 +28,19 @@ import java.util.ArrayList;
 
 public class AddQuestionActivity extends AppCompatActivity {
 
+    //Log report and request code
     private final String LOG_TAG = "AddQuestionActivity";
     private final String REQUEST_TAG = "AddQuestionActivity";
 
+    //Layout vars
     private CoordinatorLayout coordinatorLayout;
     private Spinner categorySpinner;
+    private Spinner trueAnswerSpinner;
     private EditText inputQuestion,inputAnswerA,inputAnswerB,inputAnswerC,inputAnswerD;
     private TextInputLayout inputLayoutQuestion,inputLayoutAnswerA,inputLayoutAnswerB,inputLayoutAnswerC,inputLayoutAnswerD;
+    private ProgressDialog progressDialog;
+
+    //Question handler and user data
     private QuestionHandler questionHandler;
     private String ownerId;
     private double lat,lng;
@@ -57,7 +64,7 @@ public class AddQuestionActivity extends AppCompatActivity {
             lat = bundle.getDouble("lat");
             lng = bundle.getDouble("lng");
             //setup layout
-            setupCategorySpinner();
+            setupSpinners();
             setupInput();
         }
     }
@@ -72,13 +79,21 @@ public class AddQuestionActivity extends AppCompatActivity {
      *Layout Setup
      *=================================================================================================
      **/
-    private void setupCategorySpinner(){
-        categorySpinner = (Spinner) findViewById(R.id.add_question_spinner);
+    private void setupSpinners(){
+        //category spinner
+        categorySpinner = (Spinner) findViewById(R.id.add_question_spinner_category);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.add_question_category_array,android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         categorySpinner.setAdapter(adapter);
+
+        //trueAnswerSpinner
+        trueAnswerSpinner =(Spinner) findViewById(R.id.add_question_spinner_true_answer);
+        adapter = ArrayAdapter.createFromResource(this,R.array.add_question_true_answer_array,android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        trueAnswerSpinner.setAdapter(adapter);
     }
     private void setupInput(){
         inputLayoutQuestion = (TextInputLayout) findViewById(R.id.add_question_input_layout_question);
@@ -105,19 +120,8 @@ public class AddQuestionActivity extends AppCompatActivity {
     private void addQuestion(){
         if(validateInputs())
         {
-            //if fields are ok then make request to the server and add question
-            //Toast.makeText(this,"Success",Toast.LENGTH_LONG).show();
-            //TODO:make progress dialog
-            //TODO: collect data
-            Question question = collectData();
-
-//            ArrayList<String> ans = new ArrayList<>();
-//            ans.add("AA");
-//            ans.add("BB");
-//            ans.add("CC");
-//            ans.add("DD");
-            //Question question = new Question("576d2647e39c63c016000029","Math",43.3216882,21.8977572,"Some quesertopnsdnasdna???",1,ans);
-            //questionHandler.addQuestion(question,REQUEST_TAG,new AddQuestionListener(this));
+            progressDialog = ProgressDialog.show(this,"Please wait","Sending data to the server...",false,false);
+            questionHandler.addQuestion(collectData(),REQUEST_TAG,new AddQuestionListener(this));
         }
     }
     /**
@@ -126,41 +130,51 @@ public class AddQuestionActivity extends AppCompatActivity {
      **/
     private Question collectData(){
 
-        //Toast.makeText(this,categorySpinner.getSelectedItem().toString(),Toast.LENGTH_LONG).show();
-        //new Question(ownerId,categorySpinner.getSelectedItem().toString(),)
-        return null;
+        ArrayList<String> answers = new ArrayList<>();
+        answers.add(inputAnswerA.getText().toString());
+        answers.add(inputAnswerB.getText().toString());
+        answers.add(inputAnswerC.getText().toString());
+        answers.add(inputAnswerD.getText().toString());
+
+        return new Question(
+                ownerId,
+                categorySpinner.getSelectedItem().toString(),
+                lat,lng,
+                inputQuestion.getText().toString(),
+                trueAnswerSpinner.getSelectedItemPosition(),
+                answers);
     }
     private boolean validateInputs() {
         if (inputQuestion.getText().toString().trim().isEmpty()) {
-            inputLayoutQuestion.setError(getString(R.string.add_question_err_msg_empty_input));
+            inputLayoutQuestion.setError(getString(R.string.add_question_err_msg_empty_question));
             requestFocus(inputQuestion);
             return false;
         } else {
             inputLayoutQuestion.setError("");
         }
         if (inputAnswerA.getText().toString().trim().isEmpty()) {
-            inputLayoutAnswerA.setError(getString(R.string.add_question_err_msg_empty_input));
+            inputLayoutAnswerA.setError(getString(R.string.add_question_err_msg_empty_answer));
             requestFocus(inputAnswerA);
             return false;
         } else {
             inputLayoutAnswerA.setError("");
         }
         if (inputAnswerB.getText().toString().trim().isEmpty()) {
-            inputLayoutAnswerB.setError(getString(R.string.add_question_err_msg_empty_input));
+            inputLayoutAnswerB.setError(getString(R.string.add_question_err_msg_empty_answer));
             requestFocus(inputAnswerB);
             return false;
         } else {
             inputLayoutAnswerB.setError("");
         }
         if (inputAnswerC.getText().toString().trim().isEmpty()) {
-            inputLayoutAnswerC.setError(getString(R.string.add_question_err_msg_empty_input));
+            inputLayoutAnswerC.setError(getString(R.string.add_question_err_msg_empty_answer));
             requestFocus(inputAnswerC);
             return false;
         } else {
             inputLayoutAnswerC.setError("");
         }
         if (inputAnswerD.getText().toString().trim().isEmpty()) {
-            inputLayoutAnswerD.setError(getString(R.string.add_question_err_msg_empty_input));
+            inputLayoutAnswerD.setError(getString(R.string.add_question_err_msg_empty_answer));
             requestFocus(inputAnswerD);
             return false;
         } else {
@@ -180,12 +194,26 @@ public class AddQuestionActivity extends AppCompatActivity {
      *=================================================================================================
      **/
     public void onQuestionRequestSuccess(JSONObject result){
-        //TODO:remove progress dialog
+        progressDialog.dismiss();
         try{
             if(result.getBoolean("Success")){
-
                 Log.i(LOG_TAG,result.toString());
-                //TODO:Finish activity and set result as ok
+                String questionData = null;
+                try{
+                    questionData = result.getString("Data");
+                }catch (JSONException exception){
+                    Log.e(LOG_TAG,exception.toString());
+                }
+                if(questionData==null){
+                    //if something goes wrong during data parse, then just return in MainActivity
+                    finish();
+                }else {
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("questionData", questionData);
+                    //return added question as json string
+                    setResult(RESULT_OK, resultIntent);
+                    finish();
+                }
             }else{
                 Snackbar.make(coordinatorLayout,"Something went wrong,try again later.",Snackbar.LENGTH_LONG).show();
             }
@@ -194,7 +222,8 @@ public class AddQuestionActivity extends AppCompatActivity {
         }
     }
     public void onQuestionRequestFailed(String error){
-        //TODO:remove progress dialog
+        progressDialog.dismiss();
+
         Snackbar.make(coordinatorLayout,"Something went wrong,try again later.",Snackbar.LENGTH_LONG).show();
         Log.e(LOG_TAG,error);
     }

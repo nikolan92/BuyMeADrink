@@ -1,11 +1,11 @@
 package com.project.mosis.buymeadrink;
 
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -25,7 +25,9 @@ import java.util.ArrayList;
 public class UsersRankActivity extends AppCompatActivity {
 
     final String REQUEST_TAG = "UsersRankActivity";
+    final String LOG_TAG = "UsersRankActivity";
     private UserHandler userHandler;
+    private CoordinatorLayout coordinatorLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +35,8 @@ public class UsersRankActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.user_profile_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.user_rank_coordinator_layout);
 
         userHandler = new UserHandler(this);
         userHandler.getAllUsers(REQUEST_TAG,new GetAllUsersListener(UsersRankActivity.this));
@@ -43,13 +47,9 @@ public class UsersRankActivity extends AppCompatActivity {
      * This function is called when server return all users*/
     private void usersAreReady(ArrayList<User> users){
         UsersRankArrayAdapter adapter = new UsersRankArrayAdapter(this, users);
-        ListView lv =(ListView) findViewById(R.id.listView2);
+        ListView lv =(ListView) findViewById(R.id.users_rank_list_view);
         lv.setAdapter(adapter);
 
-
-        for(int i=0;i<users.size();i++) {
-            Log.d("USERS", users.get(i).getName());
-        }
     }
 
     //Request to the server, and handle result...
@@ -66,14 +66,14 @@ public class UsersRankActivity extends AppCompatActivity {
                     users.add(new Gson().fromJson(usersInJSON.getJSONObject(i).toString(),User.class));
                 }
             }else {
-                //{"Success":false,"Error":"No users in data base."}
+                Snackbar.make(coordinatorLayout,result.getString("Error"),Snackbar.LENGTH_LONG).show();
+                Log.e(LOG_TAG,result.getString("Error"));
             }
         }catch (JSONException exception){
-            Log.e("UserRankActivity",exception.toString());
+            Log.e(LOG_TAG,exception.toString());
         }
         //Toast.makeText(this, result.toString(),Toast.LENGTH_SHORT).show();
         usersAreReady(users);
-
     }
     /**
      *This function will do some job if request is unsuccessful.

@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!--SplashScreenActivity-->
+        <!-- SplashScreenActivity -->
         <activity
             android:name=".SplashScreenActivity"
             android:label="@string/app_name"
@@ -33,22 +33,22 @@
             </intent-filter>
         </activity>
 
-        <!--MainActivity-->
+        <!-- MainActivity -->
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
 
-        <!--LogInActivity-->
+        <!-- LogInActivity -->
         <activity
             android:name=".LogInActivity"
             android:label="LogIn"/>
 
-        <!--RegisterActivity-->
+        <!-- RegisterActivity -->
         <activity
             android:name=".RegisterActivity"
             android:label="Register"/>
 
-        <!--UserProfileActivity-->
+        <!-- UserProfileActivity -->
         <activity
             android:name=".UserProfileActivity"
             android:label="My Profile"
@@ -59,7 +59,7 @@
                 android:value=".MainActivity"/>
         </activity>
 
-        <!--UsersRankActivity-->
+        <!-- UsersRankActivity -->
         <activity
             android:name=".UsersRankActivity"
             android:label="Users rank list"
@@ -68,7 +68,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
-        <!--FriendProfileActivity-->
+        <!-- FriendProfileActivity -->
         <activity
             android:name=".FriendProfileActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -76,19 +76,28 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
-        <!--AddQuestionActivity-->
-        <activity android:name=".AddQuestionActivity"
+        <!-- AddQuestionActivity -->
+        <activity
+            android:name=".AddQuestionActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+        <!-- AddFriendActivity -->
+        <activity
+            android:name=".AddFriendActivity"
+            android:theme="@style/AppTheme"/>
+        <!--CropActivity-->
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
+        <!--FriendsListActivity-->
+        <activity android:name=".FriendsListActivity"
                   android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
-        <!--AddFriendActivity-->
-        <activity
-            android:name=".AddFriendActivity"
-            android:theme="@style/AppTheme"/>
-        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
-        <!-- Mape -->
+        <!-- Maps -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>

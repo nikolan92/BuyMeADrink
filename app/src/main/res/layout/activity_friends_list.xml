@@ -6,25 +6,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:id="@+id/user_rank_coordinator_layout"
-    tools:context=".UsersRankActivity">
+    android:id="@+id/friend_list_coordinator_layout"
+    tools:context=".FriendsListActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/user_profile_toolbar"
+            android:id="@+id/friend_list_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:elevation="4dp"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_user_rank"/>
+    <include layout="@layout/content_friend_list"/>
 
 </android.support.design.widget.CoordinatorLayout>

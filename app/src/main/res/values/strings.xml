@@ -36,11 +36,20 @@
     <string name="add_question_answer_d">Answer D</string>
     <string name="add_question_question">Question</string>
 
-    <string name="add_question_err_msg_empty_input">Enter Answer</string>
+    <string name="add_question_err_msg_empty_answer">Enter Answer</string>
+    <string name="add_question_err_msg_empty_question">Enter Answer</string>
+    <string name="add_question_true_answer">True answer is:</string>
+
     <string-array name="add_question_category_array">
         <item>Geography</item>
         <item>Physics</item>
         <item>Computer science</item>
         <item>Math</item>
+    </string-array>
+    <string-array name="add_question_true_answer_array">
+        <item>Answer A</item>
+        <item>Answer B</item>
+        <item>Answer C</item>
+        <item>Answer D</item>
     </string-array>
 </resources>

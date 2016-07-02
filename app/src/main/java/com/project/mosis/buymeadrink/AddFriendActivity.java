@@ -36,12 +36,12 @@ public class AddFriendActivity extends AppCompatActivity {
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
+        String action = intent.getAction();
 
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                adapter.add(bluetoothDevice.getName() + "\n" + bluetoothDevice.getAddress());
-            }
+        if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+            BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            adapter.add(bluetoothDevice.getName() + "\n" + bluetoothDevice.getAddress());
+        }
         }
     };
 

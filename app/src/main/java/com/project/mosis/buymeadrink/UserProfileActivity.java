@@ -341,6 +341,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 //TODO:return in main activity with RESULT_OK
                 setResult(RESULT_OK);
+
                 finish();
             }else{
                 Snackbar.make(coordinatorLayout,"Something goes wrong, try again later.",Snackbar.LENGTH_LONG).show();

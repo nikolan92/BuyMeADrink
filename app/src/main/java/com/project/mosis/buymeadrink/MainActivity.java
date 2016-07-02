@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity
 
         //TEST_TAG
         //if(locationPermission)
-            //bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
+        //bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
 
     }
 
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_add_question) {
             if(currentLocation==null){
-                Snackbar.make(drawer,"Please wait while the GPS find your location.",Snackbar.LENGTH_LONG).show();
+                Snackbar.make(drawer,"Please wait until GPS find your location.",Snackbar.LENGTH_LONG).show();
             }else {
                 Intent addQuestionIntent = new Intent(this, AddQuestionActivity.class);
                 addQuestionIntent.putExtra("ownerID", user.getId());
@@ -297,11 +297,11 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(addQuestionIntent, ADD_QUESTION_ACTIVITY_REQUEST_CODE);
             }
         } else if (id == R.id.nav_my_profile) {
-                startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
+            startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_add_friend) {
-            startActivity(new Intent(this, AddFriendActivity.class));
+            startActivityForResult(new Intent(this, AddFriendActivity.class),ADD_FRIEND_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_my_friends) {
-
+            //Intent myFriendsListIntetn = new Intent(this,)
         } else if (id == R.id.nav_log_out) {
             //Clear Shared Preference and start LogIn again
             SaveSharedPreference.clearUser(this.getApplicationContext());
@@ -387,6 +387,8 @@ public class MainActivity extends AppCompatActivity
             locationPermission();
         }else if(requestCode == ADD_QUESTION_ACTIVITY_REQUEST_CODE){
             //TODO:Add new question on the map
+        }else if(requestCode == ADD_FRIEND_ACTIVITY_REQUEST_CODE){
+            //TODO:Add new friend on map
         }
     }
     /**
@@ -418,7 +420,6 @@ public class MainActivity extends AppCompatActivity
             }else{
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},LOCATION_PERMISSION_CODE);
             }
-
         }
     }
     @Override
@@ -451,7 +452,6 @@ public class MainActivity extends AppCompatActivity
      *=================================================================================================
      **/
     private class UpdateMapReceiver extends BroadcastReceiver{
-
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(LOG_TAG,intent.getAction());
@@ -651,6 +651,21 @@ public class MainActivity extends AppCompatActivity
             MainActivity mainActivity = mActivity.get();
             if(mainActivity!=null)//If activity still exist then do some job, if not just return;
                 Log.e(mainActivity.LOG_TAG,error);
+        }
+    }
+    private class MyMarker {
+        private String _id;
+        private boolean isItFriend;
+
+        MyMarker(String _id,boolean isItFriend){
+            this._id = _id;
+            this.isItFriend = isItFriend;
+        }
+        public String getID(){
+            return _id;
+        }
+        public boolean isItFriend(){
+            return isItFriend;
         }
     }
 }
