@@ -35,6 +35,8 @@ public class AddQuestionActivity extends AppCompatActivity {
     private EditText inputQuestion,inputAnswerA,inputAnswerB,inputAnswerC,inputAnswerD;
     private TextInputLayout inputLayoutQuestion,inputLayoutAnswerA,inputLayoutAnswerB,inputLayoutAnswerC,inputLayoutAnswerD;
     private QuestionHandler questionHandler;
+    private String ownerId;
+    private double lat,lng;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,12 +47,19 @@ public class AddQuestionActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.add_question_coordinator_layout);
-
         questionHandler = new QuestionHandler(this);
-        //layout
-        setupCategorySpinner();
-        setupInput();
 
+        Bundle bundle = getIntent().getExtras();
+        if(bundle!=null){
+
+            //get intent extras
+            ownerId = bundle.getString("ownerID");
+            lat = bundle.getDouble("lat");
+            lng = bundle.getDouble("lng");
+            //setup layout
+            setupCategorySpinner();
+            setupInput();
+        }
     }
 
     @Override
@@ -100,13 +109,15 @@ public class AddQuestionActivity extends AppCompatActivity {
             //Toast.makeText(this,"Success",Toast.LENGTH_LONG).show();
             //TODO:make progress dialog
             //TODO: collect data
-            ArrayList<String> ans = new ArrayList<>();
-            ans.add("AA");
-            ans.add("BB");
-            ans.add("CC");
-            ans.add("DD");
-            Question question = new Question("576d2647e39c63c016000029","Math",43.3216882,21.8977572,"Some quesertopnsdnasdna???",1,ans);
-            questionHandler.addQuestion(question,REQUEST_TAG,new AddQuestionListener(this));
+            Question question = collectData();
+
+//            ArrayList<String> ans = new ArrayList<>();
+//            ans.add("AA");
+//            ans.add("BB");
+//            ans.add("CC");
+//            ans.add("DD");
+            //Question question = new Question("576d2647e39c63c016000029","Math",43.3216882,21.8977572,"Some quesertopnsdnasdna???",1,ans);
+            //questionHandler.addQuestion(question,REQUEST_TAG,new AddQuestionListener(this));
         }
     }
     /**
@@ -114,6 +125,9 @@ public class AddQuestionActivity extends AppCompatActivity {
      *=================================================================================================
      **/
     private Question collectData(){
+
+        //Toast.makeText(this,categorySpinner.getSelectedItem().toString(),Toast.LENGTH_LONG).show();
+        //new Question(ownerId,categorySpinner.getSelectedItem().toString(),)
         return null;
     }
     private boolean validateInputs() {

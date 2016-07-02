@@ -70,10 +70,12 @@ public class MainActivity extends AppCompatActivity
     private final String LOG_TAG = "MainActivity";
     //location permission codes
     private final int LOCATION_PERMISSION_CODE = 0;
-    //Intent codes
+    //Intent request codes
     private final int USER_PROFILE_ACTIVITY_REQUEST_CODE = 0;
     private final int ADD_QUESTION_ACTIVITY_REQUEST_CODE = 1;
-    private final int SETTINGS_ACTIVITY_REQUEST_CODE = 2;
+    private final int ADD_FRIEND_ACTIVITY_REQUEST_CODE = 2;
+
+    private final int SETTINGS_ACTIVITY_REQUEST_CODE = 3;
     //UserHandler Volley request code
     private final String REQUEST_TAG = "MainActivity";
     //Layout var
@@ -92,7 +94,7 @@ public class MainActivity extends AppCompatActivity
     private HashMap<Marker,String> markerOnClick;
     private Marker currentLocation;
 
-    //Service var
+    //Service vars
     private UpdateMapReceiver updateMapReceiver;
     private LocationService locationService;
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -110,7 +112,7 @@ public class MainActivity extends AppCompatActivity
     };
     private boolean locationPermission = false;
     private boolean leaveServiceOnAfterDestroy = true;
-    //End of Service
+    //End of Service vars
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -285,16 +287,20 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_add_question) {
-            startActivity(new Intent(this,AddQuestionActivity.class));
+            if(currentLocation==null){
+                Snackbar.make(drawer,"Please wait while the GPS find your location.",Snackbar.LENGTH_LONG).show();
+            }else {
+                Intent addQuestionIntent = new Intent(this, AddQuestionActivity.class);
+                addQuestionIntent.putExtra("ownerID", user.getId());
+                addQuestionIntent.putExtra("lat", currentLocation.getPosition().latitude);
+                addQuestionIntent.putExtra("lng", currentLocation.getPosition().longitude);
+                startActivityForResult(addQuestionIntent, ADD_QUESTION_ACTIVITY_REQUEST_CODE);
+            }
         } else if (id == R.id.nav_my_profile) {
-            startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
+                startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_add_friend) {
-
             startActivity(new Intent(this, BluetoothActivity.class));
-
         } else if (id == R.id.nav_my_friends) {
-            //Test
-            startActivity(new Intent(this,FriendProfileActivity.class));
 
         } else if (id == R.id.nav_log_out) {
             //Clear Shared Preference and start LogIn again
@@ -379,6 +385,8 @@ public class MainActivity extends AppCompatActivity
         }else if(requestCode == SETTINGS_ACTIVITY_REQUEST_CODE)
         {
             locationPermission();
+        }else if(requestCode == ADD_QUESTION_ACTIVITY_REQUEST_CODE){
+            //TODO:Add new question on the map
         }
     }
     /**
