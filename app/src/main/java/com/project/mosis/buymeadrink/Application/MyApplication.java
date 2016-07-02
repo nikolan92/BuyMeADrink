@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 
 //ova klasa dodaje user-a kao globalnu promenjivu kojoj moze da se pristupa iz bilo kog activitja u aplikaciji
@@ -11,14 +12,21 @@ import com.project.mosis.buymeadrink.DataLayer.DataObject.User;
 //mislim da ce da nam treba da bi iz razlicitih aktivitija pristupali ulogovanom user-u
 public class MyApplication extends Application{
 
-    private User user=null;
+    private User user = null;
     private boolean serviceSettings = true;
+    private LatLng currentLocation = null;
 
     public boolean getServiceSettings(){
         return serviceSettings;
     }
     public void setServiceSetings(boolean serviceSettings){
         this.serviceSettings = serviceSettings;
+    }
+    public LatLng getCurrentLocation(){
+        return this.currentLocation;
+    }
+    public void setCurrentLocation(LatLng currentLocation){
+        this.currentLocation = currentLocation;
     }
 
     public User getUser(){

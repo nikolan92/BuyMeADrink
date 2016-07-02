@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity
     private HashMap<String,String> friends_names;
     private HashMap<Marker,String> markerOnClick;
     private Marker currentLocation;
-
+    private LatLng globalCurrentLocation;
     //Service vars
     private UpdateMapReceiver updateMapReceiver;
     private LocationService locationService;
@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity
             user = SaveSharedPreference.GetUser(this);
         }
 
+        globalCurrentLocation = ((MyApplication) MainActivity.this.getApplication()).getCurrentLocation();
         //restore serviceSettings
         leaveServiceOnAfterDestroy = ((MyApplication) MainActivity.this.getApplication()).getServiceSettings();
 
@@ -170,6 +171,12 @@ public class MainActivity extends AppCompatActivity
             //TEST_TAG
             bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        restoreCurrentLocation();
     }
 
     @Override
@@ -530,6 +537,24 @@ public class MainActivity extends AppCompatActivity
             markerOnClick.put(currentLocation,user.getId());
         }else{
             animateMarker(currentLocation,new LatLng(location.getLat(),location.getLng()),new LatLngInterpolator.Linear());
+        }
+    }
+    //speed up showing user location after user return from some activity because MainActivity lost all markers when
+    // user goes in some other activity actually MainActivity again go through onCreate method
+    private void restoreCurrentLocation(){
+        if(mMap==null)
+            return;
+        if(globalCurrentLocation==null){
+            return;
+        }
+        if(currentLocation==null){
+            Bitmap icon = ((BitmapDrawable)userImage.getDrawable()).getBitmap();
+            Bitmap smallIcon = Bitmap.createScaledBitmap(icon,100,100,false);//Sony xperia mini 40x40
+            MarkerOptions markerOptions = new MarkerOptions().position(globalCurrentLocation).title("Me").icon(BitmapDescriptorFactory.fromBitmap(smallIcon));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(globalCurrentLocation,18));
+
+            currentLocation = mMap.addMarker(markerOptions);
+            markerOnClick.put(currentLocation,user.getId());
         }
     }
 
