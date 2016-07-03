@@ -305,7 +305,7 @@ public class LocationService extends Service {
                     "Your have one question in your nearby.":
                     "Your have "+ num_of_objects_in_nearby +" questions in your nearby.";
             NotificationCompat.Builder  mBuilder = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.mipmap.ic_question_mark)
+                    .setSmallIcon(R.mipmap.ic_question_mark_big)
                     .setContentTitle("Question in nearby")
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(tmp))
                     .setContentText(tmp)

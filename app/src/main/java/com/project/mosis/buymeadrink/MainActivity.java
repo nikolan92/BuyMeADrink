@@ -181,7 +181,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -401,6 +400,10 @@ public class MainActivity extends AppCompatActivity
             locationPermission();
         }else if(requestCode == ADD_QUESTION_ACTIVITY_REQUEST_CODE){
             //TODO:Add new question on the map
+            if(resultCode == RESULT_OK){
+                showNewQuestionOnMap(new Gson().fromJson(data.getStringExtra("questionData"),Question.class));
+            }
+
         }else if(requestCode == ADD_FRIEND_ACTIVITY_REQUEST_CODE){
             //TODO:Add new friend on map
         }
@@ -477,6 +480,13 @@ public class MainActivity extends AppCompatActivity
                 updateMyLocation((ObjectLocation) intent.getParcelableExtra(LocationService.MY_LOCATION));
             }
         }
+    }
+    /**
+     *Answer dialog
+     *=================================================================================================
+     **/
+    private void showAnswerDialog(){
+
     }
     /**
      *Work with map and markers
@@ -612,12 +622,22 @@ public class MainActivity extends AppCompatActivity
             LatLng latLng = new LatLng(questions.get(i).getLat(),questions.get(i).getLng());
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(latLng)
-                    .title(questions.get(i).getQuestion())//set friend name in title
+                    .title(questions.get(i).getQuestion())//set question name in title
                     .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_question_mark));
             Marker marker = mMap.addMarker(markerOptions);
 
             markerOnClick.put(marker,new MyMarker(questions.get(i).getID(),false));
         }
+    }
+    private void showNewQuestionOnMap(Question newQuestion){
+        LatLng latLng = new LatLng(newQuestion.getLat(),newQuestion.getLng());
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(latLng)
+                .title(newQuestion.getQuestion())//set question name in title
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_question_mark));
+        Marker marker = mMap.addMarker(markerOptions);
+
+        markerOnClick.put(marker,new MyMarker(newQuestion.getID(),false));
     }
     /**
      *

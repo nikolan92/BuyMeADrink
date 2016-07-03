@@ -10,8 +10,11 @@ public class Question {
     private int trueAnswer;
     private ArrayList<String> answers;
     private double lat,lng;
+    private String prize;
+    private String code;
 
-    public Question(String _id,String ownerID,String category,double lat,double lng,String question,int trueAnswer,ArrayList<String>answers){
+    public Question(String _id,String ownerID,String category,double lat,double lng,
+                    String question,int trueAnswer,ArrayList<String>answers,String prize,String code){
         this._id = _id;
         this.ownerID = ownerID;
         this.question = question;
@@ -20,8 +23,10 @@ public class Question {
         this.lng = lng;
         this.trueAnswer = trueAnswer;
         this.answers =answers;
+        this.prize = prize;
+        this.code = code;
     }
-    public Question(String ownerID,String category,double lat,double lng,String question,int trueAnswer,ArrayList<String>answers){
+    public Question(String ownerID,String category,double lat,double lng,String question,int trueAnswer,ArrayList<String>answers,String prize,String code){
         this.ownerID = ownerID;
         this.question = question;
         this.category = category;
@@ -29,6 +34,8 @@ public class Question {
         this.lng = lng;
         this.trueAnswer = trueAnswer;
         this.answers =answers;
+        this.prize = prize;
+        this.code = code;
     }
 
     public String getID(){

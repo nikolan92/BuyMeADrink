@@ -36,8 +36,8 @@ public class AddQuestionActivity extends AppCompatActivity {
     private CoordinatorLayout coordinatorLayout;
     private Spinner categorySpinner;
     private Spinner trueAnswerSpinner;
-    private EditText inputQuestion,inputAnswerA,inputAnswerB,inputAnswerC,inputAnswerD;
-    private TextInputLayout inputLayoutQuestion,inputLayoutAnswerA,inputLayoutAnswerB,inputLayoutAnswerC,inputLayoutAnswerD;
+    private EditText inputQuestion,inputAnswerA,inputAnswerB,inputAnswerC,inputAnswerD,inputPrize,inputCode;
+    private TextInputLayout inputLayoutQuestion,inputLayoutAnswerA,inputLayoutAnswerB,inputLayoutAnswerC,inputLayoutAnswerD,inputLayoutPrize,inputLayoutCode;
     private ProgressDialog progressDialog;
 
     //Question handler and user data
@@ -107,6 +107,11 @@ public class AddQuestionActivity extends AppCompatActivity {
         inputLayoutAnswerD = (TextInputLayout) findViewById(R.id.add_question_input_layout_answer_d);
         inputAnswerD = (EditText) findViewById(R.id.add_question_input_answer_d);
 
+        inputLayoutPrize = (TextInputLayout) findViewById(R.id.add_question_input_layout_prize);
+        inputPrize = (EditText) findViewById(R.id.add_question_input_prize);
+        inputLayoutCode = (TextInputLayout) findViewById(R.id.add_question_input_layout_code);
+        inputCode = (EditText) findViewById(R.id.add_question_input_code);
+
         final Button add_btn = (Button)findViewById(R.id.add_question_add_btn);
         assert add_btn!=null;
         add_btn.setOnClickListener(new View.OnClickListener() {
@@ -142,7 +147,9 @@ public class AddQuestionActivity extends AppCompatActivity {
                 lat,lng,
                 inputQuestion.getText().toString(),
                 trueAnswerSpinner.getSelectedItemPosition(),
-                answers);
+                answers,
+                inputPrize.getText().toString(),
+                inputCode.getText().toString());
     }
     private boolean validateInputs() {
         if (inputQuestion.getText().toString().trim().isEmpty()) {
@@ -179,6 +186,20 @@ public class AddQuestionActivity extends AppCompatActivity {
             return false;
         } else {
             inputLayoutAnswerD.setError("");
+        }
+        if (inputPrize.getText().toString().trim().isEmpty()) {
+            inputLayoutPrize.setError(getString(R.string.add_question_err_msg_empty_prize));
+            requestFocus(inputPrize);
+            return false;
+        } else {
+            inputLayoutPrize.setError("");
+        }
+        if (inputCode.getText().toString().trim().isEmpty()) {
+            inputLayoutCode.setError(getString(R.string.add_question_err_msg_empty_code));
+            requestFocus(inputCode);
+            return false;
+        } else {
+            inputLayoutCode.setError("");
         }
 
         return true;
