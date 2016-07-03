@@ -49,7 +49,6 @@ public class UsersRankActivity extends AppCompatActivity {
         UsersRankArrayAdapter adapter = new UsersRankArrayAdapter(this, users);
         ListView lv =(ListView) findViewById(R.id.users_rank_list_view);
         lv.setAdapter(adapter);
-
     }
 
     //Request to the server, and handle result...
@@ -82,7 +81,7 @@ public class UsersRankActivity extends AppCompatActivity {
         Toast.makeText(this, "Error occur:\n"+ error.toString(),Toast.LENGTH_SHORT).show();
     }
     /**
-     * Static inner classes do not hold an implicit reference to their outher clases, so activity will not be leaked.
+     * Static inner classes do not hold an implicit reference to their outer classes, so activity will not be leaked.
      * Also because i need to access to an activity method i need to hold a reference to it. But i keep weakReference,
      * so GC will not be prevented from deleting it. Because of that i need to check whether activity still exist.
      * */

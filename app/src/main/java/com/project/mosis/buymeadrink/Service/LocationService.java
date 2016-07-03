@@ -52,7 +52,7 @@ public class LocationService extends Service {
     private Handler backgroundHandler,foregroundHandler;
     private ServiceBackgroundThread serviceBackgroundThread;
     private ServiceForegroundThread serviceForegroundThread;
-    private final int backgroundThreadRefreshRate= 600000;//10m
+    private final int backgroundThreadRefreshRate= 300000;//5m
     private final int foregroundThreadRefreshRate= 6000;//6s
     //Location manager and lister
     private LocationManager mLocationManager;
@@ -223,10 +223,12 @@ public class LocationService extends Service {
                             //bigger priority than friends in nearby. so question will be shown in notification.
                             //Otherwise friends will be in notification
                             if(jsonArray.length()>0){
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    //TODO:make request for question to the server
-                                }
+                                //parse questions_in_nearby
+                                makeNotification(null,jsonArray.length(),false);
+                                //TODO:make notificationb
+
                             }else{
+                                //parse friends_in_nearby
                                 jsonArray = data.getJSONArray("friends_in_nearby");
                                 if(jsonArray.length()>0) {
                                     String friendID = jsonArray.get(0).toString();
@@ -258,10 +260,7 @@ public class LocationService extends Service {
                     } catch (Exception exception) {
                         Log.e(LOG_TAG, exception.toString());
                     }
-                    //makeNotification();
-                    //TODO: here just parse nearby places and make notification for nearby places if exist
-                }
-                //TODO: make notification if condition are met.
+                }//end of isBind = false
             }
             @Override
             public void onFailed(String error) {
@@ -270,7 +269,7 @@ public class LocationService extends Service {
             }
         });
     }
-    private void makeNotification(JSONObject result,int friends_in_nearby,boolean isFriend){
+    private void makeNotification(JSONObject result,int num_of_objects_in_nearby,boolean isFriend){
         if(isFriend) {
             User friend=null;
             try {
@@ -282,10 +281,10 @@ public class LocationService extends Service {
             }
             if(friend==null)
                 return;
-            int FRIEND_NOTIFICATION_ID = 1;
-            String tmp = friends_in_nearby==1?
+            int FRIEND_NOTIFICATION_ID = 0;
+            String tmp = num_of_objects_in_nearby==1?
                     "Your friend " + friend.getName()+" is in your nearby.":
-                    "Your friend " + friend.getName()+" is in your nearby and "+(friends_in_nearby-1)+" more.";
+                    "Your friend " + friend.getName()+" is in your nearby and "+(num_of_objects_in_nearby-1)+" more.";
             NotificationCompat.Builder  mBuilder = new NotificationCompat.Builder(this)
                     .setSmallIcon(R.mipmap.ic_default_friend)
                     .setContentTitle("Friends in nearby")
@@ -301,11 +300,25 @@ public class LocationService extends Service {
             NotificationManager mManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             mManager.notify(FRIEND_NOTIFICATION_ID,mBuilder.build());
         }else{
-            //TODO:Parse data for question
+            int QUESTION_NOTIFICATION_ID = 1;
+            String tmp = num_of_objects_in_nearby==1?
+                    "Your have one question in your nearby.":
+                    "Your have "+ num_of_objects_in_nearby +" questions in your nearby.";
+            NotificationCompat.Builder  mBuilder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.ic_question_mark)
+                    .setContentTitle("Question in nearby")
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(tmp))
+                    .setContentText(tmp)
+                    .setAutoCancel(true)
+                    .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                    .setLights(Color.CYAN,1000,500);
 
+            Intent intent = new Intent(this, MainActivity.class);
+            PendingIntent mainActivityPendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.setContentIntent(mainActivityPendingIntent);
+            NotificationManager mManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mManager.notify(QUESTION_NOTIFICATION_ID,mBuilder.build());
         }
-
-
     }
     /**
      * <p>This class running in background and when mainActivity (app) is not in use, and report location to the server,
