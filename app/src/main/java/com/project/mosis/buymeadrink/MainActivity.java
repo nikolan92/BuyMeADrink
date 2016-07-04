@@ -310,7 +310,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_my_profile) {
             startActivityForResult(new Intent(this,UserProfileActivity.class),USER_PROFILE_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_add_friend) {
-            startActivityForResult(new Intent(this, AddFriendActivity.class),ADD_FRIEND_ACTIVITY_REQUEST_CODE);
+            Intent addFriendIntent = new Intent(this,AddFriendActivity.class);
+            addFriendIntent.putExtra("userID",user.getId());
+            startActivityForResult(addFriendIntent,ADD_FRIEND_ACTIVITY_REQUEST_CODE);
         } else if (id == R.id.nav_my_friends) {
             Intent myFriendsListIntent = new Intent(this,FriendsListActivity.class);
             myFriendsListIntent.putExtra("userID",user.getId());
@@ -576,7 +578,7 @@ public class MainActivity extends AppCompatActivity
             Bitmap icon = ((BitmapDrawable)userImage.getDrawable()).getBitmap();
             Bitmap smallIcon = Bitmap.createScaledBitmap(icon,100,100,false);//Sony xperia mini 40x40
             MarkerOptions markerOptions = new MarkerOptions().position(globalCurrentLocation).title("Me").icon(BitmapDescriptorFactory.fromBitmap(smallIcon));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(globalCurrentLocation,18));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(globalCurrentLocation,12));
 
             currentLocation = mMap.addMarker(markerOptions);
             markerOnClick.put(currentLocation,new MyMarker(user.getId(),true));

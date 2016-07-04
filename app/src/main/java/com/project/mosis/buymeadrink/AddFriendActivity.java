@@ -9,11 +9,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,11 +20,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.project.mosis.buymeadrink.DataLayer.UserHandler;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 public class AddFriendActivity extends AppCompatActivity {
@@ -45,6 +45,8 @@ public class AddFriendActivity extends AppCompatActivity {
         }
     };
 
+    private ConnectedThread connectedThread;
+
     private BluetoothAdapter bluetoothAdapter;
     //private ToggleButton toggleButton;
     private ListView listView;
@@ -52,108 +54,109 @@ public class AddFriendActivity extends AppCompatActivity {
     private static final int ENABLE_BT_REQUEST_CODE = 1;
     private static final int DISCOVERABLE_BT_REQUEST_CODE = 2;
     private static final int DISCOVERABLE_DURATION = 300;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
 
+    private final String MESSAGE_READ = "READ_ID";
+
+    //UserHandler
+    UserHandler userHandler;
+    String userID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_friend);
 
-        ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
-        assert toggle != null;
 
-//        if(bluetoothAdapter == null) {
-//            //device does not support BT
-//            Toast.makeText(getApplicationContext(), "Oops! Your device does not support Bluetooth", Toast.LENGTH_SHORT).show();
-//            toggle.setChecked(false);
-//        } else {
-            toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        // The toggle is enabled
-                        //to turn on bt
-                        if (!bluetoothAdapter.isEnabled()) {
-                            //permission dialog show
-                            Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                            startActivityForResult(enableBluetoothIntent, ENABLE_BT_REQUEST_CODE);
+        Bundle bundle = getIntent().getExtras();
+        if(bundle!=null) {
+            userID = bundle.getString("userID");
+            userHandler = new UserHandler(this);
+
+
+            ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
+            assert toggle != null;
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if(bluetoothAdapter == null) {
+                //device does not support BT
+                Toast.makeText(getApplicationContext(), "Oops! Your device does not support Bluetooth", Toast.LENGTH_SHORT).show();
+                toggle.setChecked(false);
+            } else {
+                toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            // The toggle is enabled
+                            //to turn on bt
+//                            if (!bluetoothAdapter.isEnabled()) {
+//                                //permission dialog show
+//                                Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//                                startActivityForResult(enableBluetoothIntent, ENABLE_BT_REQUEST_CODE);
+//                            } else {
+                                Toast.makeText(getApplicationContext(), "Your device has already been enabled." + "\n" + "Scanning for remote bluetooth devices...", Toast.LENGTH_SHORT).show();
+                                //discover remote bt devices
+                                discoverDevices();
+                                // make local device discoverable by other devices
+                                makeDiscoverable();
+                            //}
                         } else {
-                            Toast.makeText(getApplicationContext(), "Your device has already been enabled." + "\n" + "Scanning for remote bluetooth devices...", Toast.LENGTH_SHORT).show();
-                            //discover remote bt devices
-                            discoverDevices();
-                            // make local device discoverable by other devices
-                            makeDiscoverable();
+                            // The toggle is disabled
+                            //turn off bt
+                            bluetoothAdapter.disable();
+                            adapter.clear();
+                            Toast.makeText(getApplicationContext(), "Your device is now disabled.", Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        // The toggle is disabled
-                        //turn off bt
-                        bluetoothAdapter.disable();
-                        adapter.clear();
-                        Toast.makeText(getApplicationContext(), "Your device is now disabled.", Toast.LENGTH_SHORT).show();
                     }
+                });
+            }
+
+            listView = (ListView) findViewById(R.id.listView);
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                    String itemValue = (String) listView.getItemAtPosition(position);
+
+                    String MAC = itemValue.substring(itemValue.length() - 17);
+
+                    BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(MAC);
+
+                    ConnectThread t = new ConnectThread(bluetoothDevice);
+                    t.start();
                 }
             });
-//        }
 
-        listView = (ListView) findViewById(R.id.listView);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                String itemValue = (String) listView.getItemAtPosition(position);
-
-                String MAC = itemValue.substring(itemValue.length() - 17);
-
-                BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(MAC);
-
-                ConnectingThread t = new ConnectingThread(bluetoothDevice);
-                t.start();
-            }
-        });
-
-        adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1);
-        listView.setAdapter(adapter);
-
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+            adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1);
+            listView.setAdapter(adapter);
+        }
     }
-
-
-
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == ENABLE_BT_REQUEST_CODE) {
-            //bt successfully enabled
-            if (resultCode == Activity.RESULT_OK) {
-                Toast.makeText(getApplicationContext(), "Ha! Bluetooth is now enabled." + "\n" + "Scanning for remote Bluetooth devices...", Toast.LENGTH_SHORT).show();
+//        if (requestCode == ENABLE_BT_REQUEST_CODE) {
+//            //bt successfully enabled
+//            if (resultCode == Activity.RESULT_OK) {
+//                Toast.makeText(getApplicationContext(), "Ha! Bluetooth is now enabled." + "\n" + "Scanning for remote Bluetooth devices...", Toast.LENGTH_SHORT).show();
+//
+//                makeDiscoverable();
+//
+//                discoverDevices();
+//
+//                AcceptThread t = new AcceptThread();
+//                t.start();
+//
+//            } else { //result canceled user refused it
+//
+//                Toast.makeText(getApplicationContext(), "Bluetooth is not enabled.", Toast.LENGTH_SHORT).show();
+//
+////                toggleButton.setChecked(false);
+//            }
+//        } else
+            if (requestCode == DISCOVERABLE_BT_REQUEST_CODE) {
 
-                makeDiscoverable();
-
-                discoverDevices();
-
-                ListeningThread t = new ListeningThread();
-                t.start();
-
-            } else { //result canceled user refused it
-
-                Toast.makeText(getApplicationContext(), "Bluetooth is not enabled.", Toast.LENGTH_SHORT).show();
-
-//                toggleButton.setChecked(false);
-            }
-        } else if (requestCode == DISCOVERABLE_BT_REQUEST_CODE) {
-
-            if (resultCode == DISCOVERABLE_DURATION) {
-                Toast.makeText(getApplicationContext(), "Your device is now discoverable by other devices for " + DISCOVERABLE_DURATION + " seconds", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "fail to enable discoverability on your device.", Toast.LENGTH_SHORT).show();
-            }
+                if (resultCode == DISCOVERABLE_DURATION) {
+                    Toast.makeText(getApplicationContext(), "Your device is now discoverable by other devices for " + DISCOVERABLE_DURATION + " seconds", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "fail to enable discoverability on your device.", Toast.LENGTH_SHORT).show();
+                }
         }
     }
 
@@ -188,73 +191,16 @@ public class AddFriendActivity extends AppCompatActivity {
         this.unregisterReceiver(broadcastReceiver);
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_bluetooth, menu); //Ovo ispitati!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Bluetooth Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.project.mosis.buymeadrink/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
-    }
-
     @Override
     public void onStop() {
         super.onStop();
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Bluetooth Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.project.mosis.buymeadrink/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
     }
 
-    private class ListeningThread extends Thread {
+    private class AcceptThread extends Thread {
         private final BluetoothServerSocket bluetoothServerSocket;
 
-        public ListeningThread() {
+        public AcceptThread() {
             BluetoothServerSocket temp = null;
             try {
                 temp = bluetoothAdapter.listenUsingRfcommWithServiceRecord(getString(R.string.app_name), uuid);
@@ -285,7 +231,8 @@ public class AddFriendActivity extends AppCompatActivity {
                    /*
                        manageBluetoothConnection(bluetoothSocket);
                    */
-
+                    connectedThread = new ConnectedThread(bluetoothSocket);
+                    connectedThread.run();
 
                     try {
                         bluetoothServerSocket.close();
@@ -307,11 +254,11 @@ public class AddFriendActivity extends AppCompatActivity {
         }
     }
 
-    private class ConnectingThread extends Thread {
+    private class ConnectThread extends Thread {
         private final BluetoothSocket bluetoothSocket;
         private final BluetoothDevice bluetoothDevice;
 
-        public ConnectingThread(BluetoothDevice device) {
+        public ConnectThread(BluetoothDevice device) {
             BluetoothSocket temp = null;
             bluetoothDevice = device;
 
@@ -340,6 +287,10 @@ public class AddFriendActivity extends AppCompatActivity {
             /*
                manageBluetoothConnection(bluetoothSocket);
             */
+            connectedThread = new ConnectedThread(bluetoothSocket);
+            //connectedThread.run();
+
+            connectedThread.write(new String("TEST TEST").getBytes(Charset.forName("UTF-8")));
         }
 
         public void cancel() {
@@ -350,4 +301,59 @@ public class AddFriendActivity extends AppCompatActivity {
             }
         }
     }
+    private class ConnectedThread extends Thread {
+        private final BluetoothSocket mmSocket;
+        private final InputStream mmInStream;
+        private final OutputStream mmOutStream;
+
+        public ConnectedThread(BluetoothSocket socket) {
+            mmSocket = socket;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+
+            // Get the input and output streams, using temp objects because
+            // member streams are final
+            try {
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
+            } catch (IOException e) { }
+
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
+        }
+
+        public void run() {
+            byte[] buffer = new byte[1024];  // buffer store for the stream
+            int bytes; // bytes returned from read()
+
+            // Keep listening to the InputStream until an exception occurs
+            while (true) {
+                try {
+                    // Read from the InputStream
+                    bytes = mmInStream.read(buffer);
+                    // Send the obtained bytes to the UI activity
+//                    mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
+//                            .sendToTarget();
+                    Log.i("BLUTHOTOOF::::::::::",new String(buffer,"UTF-8"));
+                } catch (IOException e) {
+                    break;
+                }
+            }
+        }
+
+        /* Call this from the main activity to send data to the remote device */
+        public void write(byte[] bytes) {
+            try {
+                mmOutStream.write(bytes);
+            } catch (IOException e) { }
+        }
+
+        /* Call this from the main activity to shutdown the connection */
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) { }
+        }
+    }
+
 }

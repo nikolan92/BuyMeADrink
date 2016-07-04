@@ -283,8 +283,8 @@ public class LocationService extends Service {
                 return;
             int FRIEND_NOTIFICATION_ID = 0;
             String tmp = num_of_objects_in_nearby==1?
-                    "Your friend " + friend.getName()+" is in your nearby.":
-                    "Your friend " + friend.getName()+" is in your nearby and "+(num_of_objects_in_nearby-1)+" more.";
+                    "Your friend " + friend.getName()+" is nearby.":
+                    "Your friend " + friend.getName()+" is nearby and "+(num_of_objects_in_nearby-1)+" more.";
             NotificationCompat.Builder  mBuilder = new NotificationCompat.Builder(this)
                     .setSmallIcon(R.mipmap.ic_default_friend)
                     .setContentTitle("Friends in nearby")
@@ -302,8 +302,8 @@ public class LocationService extends Service {
         }else{
             int QUESTION_NOTIFICATION_ID = 1;
             String tmp = num_of_objects_in_nearby==1?
-                    "Your have one question in your nearby.":
-                    "Your have "+ num_of_objects_in_nearby +" questions in your nearby.";
+                    "Your have one question nearby.":
+                    "Your have "+ num_of_objects_in_nearby +" questions nearby.";
             NotificationCompat.Builder  mBuilder = new NotificationCompat.Builder(this)
                     .setSmallIcon(R.mipmap.ic_question_mark_big)
                     .setContentTitle("Question in nearby")
