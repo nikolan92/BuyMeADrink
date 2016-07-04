@@ -86,16 +86,25 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+        <!--AnswerTheQuestionActivity-->
+        <activity android:name=".AnswerTheQuestionActivity"
+                  android:label="Answer The Question"
+                  android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
         <!-- AddFriendActivity -->
         <activity
             android:name=".AddFriendActivity"
             android:theme="@style/AppTheme"/>
-        <!--CropActivity-->
+        <!-- CropActivity -->
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
-        <!--FriendsListActivity-->
-        <activity android:name=".FriendsListActivity"
-                  android:label="My Friends"
-                  android:theme="@style/AppTheme.NoActionBar">
+        <!-- FriendsListActivity -->
+        <activity
+            android:name=".FriendsListActivity"
+            android:label="My Friends"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>

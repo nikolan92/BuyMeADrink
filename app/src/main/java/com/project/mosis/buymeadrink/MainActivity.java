@@ -2,6 +2,7 @@ package com.project.mosis.buymeadrink;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -77,8 +78,9 @@ public class MainActivity extends AppCompatActivity
     private final int USER_PROFILE_ACTIVITY_REQUEST_CODE = 0;
     private final int ADD_QUESTION_ACTIVITY_REQUEST_CODE = 1;
     private final int ADD_FRIEND_ACTIVITY_REQUEST_CODE = 2;
+    private final int ANSWER_THE_QUESTION_ACTIVITY_REQUSET_CODE = 3;
+    private final int SETTINGS_ACTIVITY_REQUEST_CODE = 4;
 
-    private final int SETTINGS_ACTIVITY_REQUEST_CODE = 3;
     //UserHandler Volley request code
     private final String REQUEST_TAG = "MainActivity";
     //Layout var
@@ -399,11 +401,9 @@ public class MainActivity extends AppCompatActivity
         {
             locationPermission();
         }else if(requestCode == ADD_QUESTION_ACTIVITY_REQUEST_CODE){
-            //TODO:Add new question on the map
             if(resultCode == RESULT_OK){
                 showNewQuestionOnMap(new Gson().fromJson(data.getStringExtra("questionData"),Question.class));
             }
-
         }else if(requestCode == ADD_FRIEND_ACTIVITY_REQUEST_CODE){
             //TODO:Add new friend on map
         }
@@ -482,13 +482,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
     /**
-     *Answer dialog
-     *=================================================================================================
-     **/
-    private void showAnswerDialog(){
-
-    }
-    /**
      *Work with map and markers
      *=================================================================================================
      **/
@@ -506,7 +499,9 @@ public class MainActivity extends AppCompatActivity
                     intent.putExtra("friendID", markerOnClick.get(marker).getID());
                     startActivity(intent);
                 }else{
-                    //TODO:Start question answer dialog
+                    Intent intent = new Intent(MainActivity.this, AnswerTheQuestionActivity.class);
+                    intent.putExtra("questionID", markerOnClick.get(marker).getID());
+                    startActivity(intent);
                 }
             }
         });
