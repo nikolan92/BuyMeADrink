@@ -16,24 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:padding="@dimen/activity_horizontal_margin">
-                <TextView
-                    android:id="@+id/answer_the_question_question"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/no_data"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textColor="#212121"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"/>
 
-            </RelativeLayout>
-            <include layout="@layout/item_divider" />
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -51,6 +34,27 @@
                     android:layout_centerHorizontal="true"/>
 
             </RelativeLayout>
+
+            <include layout="@layout/item_divider" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:padding="@dimen/activity_horizontal_margin">
+                <TextView
+                    android:id="@+id/answer_the_question_question"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_data"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="#212121"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+            </RelativeLayout>
+
             <include layout="@layout/item_divider" />
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -174,26 +178,12 @@
                     android:layout_alignParentEnd="true"/>
             </RelativeLayout>
             <include layout="@layout/item_divider" />
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
                 <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/btn_cancel"
-                    android:id="@+id/answer_the_question_cancel_btn"
-                    android:layout_weight="1"/>
-
-                <Button
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/btn_answer"
-                    android:id="@+id/answer_the_question_answer_btn"
-                    android:layout_weight="1"/>
+                    android:id="@+id/answer_the_question_answer_btn"/>
 
-            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

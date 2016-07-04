@@ -50,6 +50,8 @@ public class Question {
     public int getTrueAnswer(){
         return trueAnswer;
     }
+    public String getPrize(){return this.prize;}
+    public String getCode(){return this.code;}
     public String getCategory(){
         return this.category;
     }

@@ -405,7 +405,14 @@ public class MainActivity extends AppCompatActivity
                 showNewQuestionOnMap(new Gson().fromJson(data.getStringExtra("questionData"),Question.class));
             }
         }else if(requestCode == ADD_FRIEND_ACTIVITY_REQUEST_CODE){
-            //TODO:Add new friend on map
+            if(resultCode == RESULT_OK){
+                //TODO:Add new friend on map
+            }
+        }else if(requestCode == ANSWER_THE_QUESTION_ACTIVITY_REQUSET_CODE){
+            if(resultCode == RESULT_OK){
+                data.getStringExtra("questionID");
+                //TODO:remove question from the map
+            }
         }
     }
     /**
@@ -501,7 +508,8 @@ public class MainActivity extends AppCompatActivity
                 }else{
                     Intent intent = new Intent(MainActivity.this, AnswerTheQuestionActivity.class);
                     intent.putExtra("questionID", markerOnClick.get(marker).getID());
-                    startActivity(intent);
+                    intent.putExtra("userID", user.getId());
+                    startActivityForResult(intent,ANSWER_THE_QUESTION_ACTIVITY_REQUSET_CODE);
                 }
             }
         });
@@ -633,6 +641,11 @@ public class MainActivity extends AppCompatActivity
         Marker marker = mMap.addMarker(markerOptions);
 
         markerOnClick.put(marker,new MyMarker(newQuestion.getID(),false));
+    }
+    private void removeQuestionFromMap(String questionId){
+        Marker questionForRemove = markers.remove(questionId);
+        markerOnClick.remove(questionId);
+        questionForRemove.remove();
     }
     /**
      *

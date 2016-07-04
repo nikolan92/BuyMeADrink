@@ -87,7 +87,24 @@ public class QuestionHandler {
         jsonObjectRequest.setTag(tag);
         mVolleyHelper.addToRequestQueue(jsonObjectRequest);
     }
+    public void answerTheQuestion(String questionID,String userID,int answerNum,String tag,final VolleyCallBack volleyCallBack){
 
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, Constants.QUESTION_URL+"/"+questionID+"/"+userID+"/"+answerNum, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onFailed(error.toString());
+            }
+        });
+        jsonObjectRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(jsonObjectRequest);
+    }
     public void getAllAvailableQuestionsFromServer(int range){
         // range je neki odredjeni krug npr 100m
     }
