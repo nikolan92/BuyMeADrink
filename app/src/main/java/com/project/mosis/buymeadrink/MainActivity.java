@@ -239,6 +239,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void showFilterDialog(){
+
+    }
     private void setupFloatingSearch(){
         mSearchView.setOnQueryChangeListener(new FloatingSearchView.OnQueryChangeListener() {
             @Override
@@ -266,6 +269,13 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onMenuClosed() {
 
+            }
+        });
+        mSearchView.setOnMenuItemClickListener(new FloatingSearchView.OnMenuItemClickListener() {
+            @Override
+            public void onActionMenuItemSelected(MenuItem item) {
+                showFilterDialog();
+                Toast.makeText(MainActivity.this,"Filter clicked",Toast.LENGTH_LONG).show();
             }
         });
     }

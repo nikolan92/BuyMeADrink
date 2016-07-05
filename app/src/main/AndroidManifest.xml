@@ -97,6 +97,7 @@
         <!-- AddFriendActivity -->
         <activity
             android:name=".AddFriendActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
         <!-- CropActivity -->
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
