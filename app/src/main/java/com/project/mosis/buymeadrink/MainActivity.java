@@ -408,6 +408,7 @@ public class MainActivity extends AppCompatActivity
             }
         }else if(requestCode == ADD_FRIEND_ACTIVITY_REQUEST_CODE){
             if(resultCode == RESULT_OK){
+                Snackbar.make(drawer,"New friend added.",Snackbar.LENGTH_LONG).show();
                 //TODO:Add new friend on map
             }
         }else if(requestCode == ANSWER_THE_QUESTION_ACTIVITY_REQUSET_CODE){

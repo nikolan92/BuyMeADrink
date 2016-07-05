@@ -73,16 +73,4 @@ public class User {
     public double getRating(){
         return this.rating;
     }
-    public void getRating(double rating){
-        this.rating = rating;
-    }
-    public void reiseRating(){
-        if(this.rating<100000)
-            this.rating =+ 0.5;
-    }
-    public void decreaseRating(){
-        if(this.rating!=0)
-            this.rating =- 0.5;
-    }
-
 }
