@@ -9,8 +9,8 @@
                 tools:showIn="@layout/activity_users_rank">
 
     <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/users_rank_list_view"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />

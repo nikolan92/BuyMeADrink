@@ -2,6 +2,7 @@ package com.project.mosis.buymeadrink.Adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,16 +18,18 @@ import java.util.ArrayList;
 
 public class UsersRankArrayAdapter extends ArrayAdapter {
 
+    UserHandler userHandler;
+
     public UsersRankArrayAdapter(Context context, ArrayList<User> users) {
         super(context, 0, users);
+        userHandler = new UserHandler(context);
     }
-
 
     @SuppressLint("SetTextI18n")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         User user = (User) getItem(position);
-        UserHandler userHandler = new UserHandler(getContext().getApplicationContext());
+//        UserHandler userHandler = new UserHandler(getContext().getApplicationContext());
 
         if(convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_rank_row, parent, false);
@@ -44,7 +47,6 @@ public class UsersRankArrayAdapter extends ArrayAdapter {
         score.setText(String.valueOf(user.getRating()));
 
         userHandler.getUserImage(user.getId(),userImage);
-
         return convertView;
     }
 }

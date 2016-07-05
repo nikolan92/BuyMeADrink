@@ -15,15 +15,17 @@ import com.project.mosis.buymeadrink.R;
 import java.util.ArrayList;
 
 public class FriendsListArrayAdapter extends ArrayAdapter{
+    UserHandler userHandler;
 
     public FriendsListArrayAdapter(Context context, ArrayList<User> users) {
         super(context, 0, users);
+        userHandler = new UserHandler(context);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         User user = (User) getItem(position);
-        UserHandler userHandler = new UserHandler(getContext().getApplicationContext());
+
 
         if(convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.friends_list_row, parent, false);

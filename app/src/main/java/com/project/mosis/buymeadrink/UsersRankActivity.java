@@ -51,6 +51,7 @@ public class UsersRankActivity extends AppCompatActivity {
     private void usersAreReady(ArrayList<User> users){
         UsersRankArrayAdapter adapter = new UsersRankArrayAdapter(this, users);
         ListView lv =(ListView) findViewById(R.id.users_rank_list_view);
+        assert lv != null;
         lv.setAdapter(adapter);
     }
 
