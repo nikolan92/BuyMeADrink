@@ -56,6 +56,7 @@ public class AnswerTheQuestionActivity extends AppCompatActivity {
             userID = bundle.getString("userID");
             questionID = bundle.getString("questionID");
             questionHandler = new QuestionHandler(this);
+            progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",false,false);
             questionHandler.getQuestion(questionID,REQUEST_TAG,new GetQuestion(this));
         }
     }
@@ -131,6 +132,7 @@ public class AnswerTheQuestionActivity extends AppCompatActivity {
         questionHandler.answerTheQuestion(questionID,userID,answerNum,REQUEST_TAG,new AnswerTheQuestion(this));
     }
     private void onQuestionAnswer(JSONObject result) {
+        progressDialog.dismiss();
         try {
             if(result.getBoolean("Success")){
                 String prize = "Your prize is:"+question.getPrize();
@@ -151,7 +153,7 @@ public class AnswerTheQuestionActivity extends AppCompatActivity {
 
     }
     private void onQuestionReady(JSONObject result) {
-        //TODO:Remove dialog
+        progressDialog.dismiss();
         try{
             if(result.getBoolean("Success")){
                 question = new Gson().fromJson(result.getString("Data"),Question.class);
@@ -185,8 +187,12 @@ public class AnswerTheQuestionActivity extends AppCompatActivity {
         @Override
         public void onFailed(String error) {
             AnswerTheQuestionActivity answerTheQuestionActivity = mActivity.get();
-            if(answerTheQuestionActivity!=null)//If activity still exist then do some job, if not just return;
-                Log.e(answerTheQuestionActivity.LOG_TAG,error);
+            if (answerTheQuestionActivity != null)//If activity still exist then do some job, if not just return;
+            {
+                answerTheQuestionActivity.progressDialog.dismiss();
+                Snackbar.make(answerTheQuestionActivity.coordinatorLayout,"Something goes wrong try again later.",Snackbar.LENGTH_LONG).show();
+                Log.e(answerTheQuestionActivity.LOG_TAG, error);
+            }
         }
     }
     private static class AnswerTheQuestion implements VolleyCallBack{
@@ -205,8 +211,11 @@ public class AnswerTheQuestionActivity extends AppCompatActivity {
         public void onFailed(String error) {
             AnswerTheQuestionActivity answerTheQuestionActivity = mActivity.get();
             if(answerTheQuestionActivity!=null)//If activity still exist then do some job, if not just return;
-                Log.e(answerTheQuestionActivity.LOG_TAG,error);
+            {
+                answerTheQuestionActivity.progressDialog.dismiss();
+                Snackbar.make(answerTheQuestionActivity.coordinatorLayout,"Something goes wrong try again later.",Snackbar.LENGTH_LONG).show();
+                Log.e(answerTheQuestionActivity.LOG_TAG, error);
+            }
         }
     }
-
 }

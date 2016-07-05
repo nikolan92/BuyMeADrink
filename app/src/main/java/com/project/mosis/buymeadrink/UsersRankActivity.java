@@ -1,5 +1,6 @@
 package com.project.mosis.buymeadrink;
 
+import android.app.ProgressDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,7 @@ public class UsersRankActivity extends AppCompatActivity {
     final String LOG_TAG = "UsersRankActivity";
     private UserHandler userHandler;
     private CoordinatorLayout coordinatorLayout;
+    private ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +40,7 @@ public class UsersRankActivity extends AppCompatActivity {
 
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.user_rank_coordinator_layout);
 
+        progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",false,false);
         userHandler = new UserHandler(this);
         userHandler.getAllUsers(REQUEST_TAG,new GetAllUsersListener(UsersRankActivity.this));
     }
@@ -46,6 +49,7 @@ public class UsersRankActivity extends AppCompatActivity {
     /**
      * This function is called when server return all users*/
     private void usersAreReady(ArrayList<User> users){
+        progressDialog.dismiss();
         UsersRankArrayAdapter adapter = new UsersRankArrayAdapter(this, users);
         ListView lv =(ListView) findViewById(R.id.users_rank_list_view);
         lv.setAdapter(adapter);
@@ -78,7 +82,7 @@ public class UsersRankActivity extends AppCompatActivity {
      *This function will do some job if request is unsuccessful.
      * */
     public void onFailure(String error){
-        Toast.makeText(this, "Error occur:\n"+ error.toString(),Toast.LENGTH_SHORT).show();
+        Snackbar.make(coordinatorLayout,"Something goes wrong, try again later.",Snackbar.LENGTH_LONG).show();
     }
     /**
      * Static inner classes do not hold an implicit reference to their outer classes, so activity will not be leaked.

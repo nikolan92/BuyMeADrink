@@ -1,5 +1,6 @@
 package com.project.mosis.buymeadrink;
 
+import android.app.ProgressDialog;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -27,6 +28,7 @@ public class FriendProfileActivity extends AppCompatActivity {
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private CoordinatorLayout coordinatorLayout;
     private TextView emailInput,rationInput;
+    private ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,9 +55,11 @@ public class FriendProfileActivity extends AppCompatActivity {
             userHandler = new UserHandler(this);
             userHandler.getUserImage(friendID, friendImage);
             userHandler.getUser(friendID,REQUEST_TAG,new OnFriendDataReady(this));
+            progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",false,false);
         }
     }
     private void onFriendDataReady(JSONObject friendInJson){
+        progressDialog.dismiss();
         try {
             if (friendInJson.getBoolean("Success")) {
                 User friend = new Gson().fromJson(friendInJson.getString("Data"),User.class);
@@ -88,8 +92,11 @@ public class FriendProfileActivity extends AppCompatActivity {
         @Override
         public void onFailed(String error) {
             FriendProfileActivity friendProfileActivity = mActivity.get();
-            if(friendProfileActivity!=null)//If activity still exist then do some job, if not just return;
-                Log.e(friendProfileActivity.LOG_TAG,error);
+            if (friendProfileActivity != null)//If activity still exist then do some job, if not just return;
+            {
+                friendProfileActivity.progressDialog.dismiss();
+                Log.e(friendProfileActivity.LOG_TAG, error);
+            }
         }
     }
 

@@ -150,7 +150,7 @@ public class AddFriendActivity extends AppCompatActivity {
                 acceptThread = new AcceptThread();
                 acceptThread.start();
                 discoverDevices();
-                Toast.makeText(getApplicationContext(), "Your device is now discoverable by other devices for " + DISCOVERABLE_DURATION + " seconds.", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Your device is now discoverable by other devices for " + DISCOVERABLE_DURATION + " seconds.", Toast.LENGTH_SHORT).show();
             } else {
                 //user refuse to enable bluetooth device
                 toggle.setChecked(false);
@@ -215,7 +215,8 @@ public class AddFriendActivity extends AppCompatActivity {
         //uncheck toogle button
         toggle.setChecked(false);
 
-        user = SaveSharedPreference.GetUser(this);
+        user = ((MyApplication) AddFriendActivity.this.getApplication()).getUser();
+
         boolean alreadyFriends = false;
         if(user!=null) {
             for (int i = 0; i < user.getFriends().size(); i++) {
@@ -250,7 +251,6 @@ public class AddFriendActivity extends AppCompatActivity {
         } catch (JSONException e) {
             Log.e(LOG_TAG,e.toString());
         }
-
     }
     /**
      * Bluetooth classes
@@ -460,7 +460,7 @@ public class AddFriendActivity extends AppCompatActivity {
                         String userID = addFriendActivity.userID;
                         //send data to other device
                         addFriendActivity.connectedThread.write(userID.getBytes(Charset.forName("UTF-8")));
-                        Toast.makeText(addFriendActivity,"Sending user information to other device.\nWait...",Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(addFriendActivity,"Sending user information to other device.\nWait...",Toast.LENGTH_SHORT).show();
                         break;
                     case AddFriendActivity.MESSAGE_READ:
                         int bytes = msg.arg1;

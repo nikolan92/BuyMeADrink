@@ -1,5 +1,6 @@
 package com.project.mosis.buymeadrink;
 
+import android.app.ProgressDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ public class FriendsListActivity extends AppCompatActivity {
     final String LOG_TAG = "FriendsListActivity";
     private UserHandler userHandler;
     private CoordinatorLayout coordinatorLayout;
+    private ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +43,7 @@ public class FriendsListActivity extends AppCompatActivity {
             String userId = bundle.getString("userID");
             userHandler = new UserHandler(this);
             userHandler.getUserFriends(userId,REQUEST_TAG, new GetAllUsersListener(FriendsListActivity.this));
+            progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",false,false);
         }
     }
     @Override
@@ -54,6 +57,7 @@ public class FriendsListActivity extends AppCompatActivity {
         lv.setAdapter(adapter);
     }
     public void onSuccess(JSONObject result) {
+        progressDialog.dismiss();
         ArrayList<User> friends = new ArrayList<>();
         try {
             if(result.getBoolean("Success")) {
@@ -72,6 +76,7 @@ public class FriendsListActivity extends AppCompatActivity {
     }
 
     public void onFailure(String error) {
+        progressDialog.dismiss();
         Snackbar.make(coordinatorLayout,"Something goes wrong,try again later.",Snackbar.LENGTH_LONG).show();
         Log.e(LOG_TAG,error);
     }
