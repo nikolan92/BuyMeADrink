@@ -97,8 +97,13 @@
         <!-- AddFriendActivity -->
         <activity
             android:name=".AddFriendActivity"
+            android:label="Add Friend"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
         <!-- CropActivity -->
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
         <!-- FriendsListActivity -->

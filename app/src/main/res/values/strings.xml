@@ -44,6 +44,7 @@
     <string name="add_question_true_answer">True answer is:</string>
     <string name="add_question_prize">Prize</string>
     <string name="add_question_code">Code</string>
+    <string name="add_friend_activity_select_friend">Select friend which you want to add in your friends</string>
 
     <string-array name="add_question_category_array">
         <item>Geography</item>

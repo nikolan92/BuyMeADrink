@@ -11,8 +11,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -52,6 +55,7 @@ public class AddFriendActivity extends AppCompatActivity {
     private ListView listViewDevices;
     private ArrayAdapter<String> arrayAdapterDevices;
     private ProgressDialog progressDialog;
+    private CoordinatorLayout coordinatorLayout;
     ToggleButton toggle;
     //Intent request codes
     private static final int DISCOVERABLE_BT_REQUEST_CODE = 2;
@@ -84,6 +88,10 @@ public class AddFriendActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_friend);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.add_friend_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.add_friend_coordinator_layout);
 
         toggle = (ToggleButton) findViewById(R.id.add_friend_toggleButton);
         Bundle bundle = getIntent().getExtras();
@@ -154,7 +162,7 @@ public class AddFriendActivity extends AppCompatActivity {
             } else {
                 //user refuse to enable bluetooth device
                 toggle.setChecked(false);
-                Toast.makeText(getApplicationContext(), "Fail to enable discoverability on your device.", Toast.LENGTH_SHORT).show();
+                Snackbar.make(coordinatorLayout,"Fail to enable discoverability on your device.",Snackbar.LENGTH_LONG).show();
             }
         }
     }
@@ -226,7 +234,7 @@ public class AddFriendActivity extends AppCompatActivity {
                 }
             }
             if (alreadyFriends) {
-                Toast.makeText(this, "You are already friend with this user!", Toast.LENGTH_SHORT).show();
+                Snackbar.make(coordinatorLayout,"You are already friend with this user!",Snackbar.LENGTH_LONG).show();
             } else {
                 user.addFriend(friendID);
                 UserHandler userHandler = new UserHandler(this);
@@ -246,7 +254,7 @@ public class AddFriendActivity extends AppCompatActivity {
                 setResult(RESULT_OK,intentData);
                 finish();
             }else{
-                Toast.makeText(this,"Something goes wrong, try again later.",Toast.LENGTH_LONG).show();
+                Snackbar.make(coordinatorLayout,"Something goes wrong, try again later.",Snackbar.LENGTH_LONG).show();
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG,e.toString());
@@ -504,7 +512,7 @@ public class AddFriendActivity extends AppCompatActivity {
             AddFriendActivity addFriendActivity = this.mActivity.get();
             if(addFriendActivity!=null){
                 addFriendActivity.progressDialog.dismiss();
-                Toast.makeText(addFriendActivity,"Something goes wrong, try again later.",Toast.LENGTH_LONG).show();
+                Snackbar.make(addFriendActivity.coordinatorLayout,"Something goes wrong, try again later.",Snackbar.LENGTH_LONG).show();
             }
         }
     }
