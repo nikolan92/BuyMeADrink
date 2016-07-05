@@ -43,7 +43,7 @@ public class FriendsListActivity extends AppCompatActivity {
             String userId = bundle.getString("userID");
             userHandler = new UserHandler(this);
             userHandler.getUserFriends(userId,REQUEST_TAG, new GetAllUsersListener(FriendsListActivity.this));
-            progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",false,false);
+            progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",true,true);
         }
     }
     @Override

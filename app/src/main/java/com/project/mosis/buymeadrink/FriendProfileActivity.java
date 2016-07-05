@@ -55,7 +55,7 @@ public class FriendProfileActivity extends AppCompatActivity {
             userHandler = new UserHandler(this);
             userHandler.getUserImage(friendID, friendImage);
             userHandler.getUser(friendID,REQUEST_TAG,new OnFriendDataReady(this));
-            progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",false,false);
+            progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",true,true);
         }
     }
     private void onFriendDataReady(JSONObject friendInJson){

@@ -56,7 +56,7 @@ public class AnswerTheQuestionActivity extends AppCompatActivity {
             userID = bundle.getString("userID");
             questionID = bundle.getString("questionID");
             questionHandler = new QuestionHandler(this);
-            progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",false,false);
+            progressDialog = ProgressDialog.show(this,"Please wait","Waiting for data from the server...",true,false);
             questionHandler.getQuestion(questionID,REQUEST_TAG,new GetQuestion(this));
         }
     }

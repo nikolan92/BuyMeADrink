@@ -172,6 +172,20 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
+//        if(locationPermission){
+//            updateMapReceiver = new UpdateMapReceiver();
+//            IntentFilter intentFilter = new IntentFilter();
+//            intentFilter.addAction(LocationService.ACTION_UPDATE_FRIENDS_LOCATIONS);
+//            intentFilter.addAction(LocationService.ACTION_UPDATE_MY_LOCATION);
+//            registerReceiver(updateMapReceiver,intentFilter);
+//            //TEST_TAG
+//            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
+//        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         if(locationPermission){
             updateMapReceiver = new UpdateMapReceiver();
             IntentFilter intentFilter = new IntentFilter();
@@ -184,14 +198,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        userHandler.cancelAllRequestWithTag(REQUEST_TAG);
+    protected void onPause() {
+        super.onPause();
         if(locationPermission) {
             unregisterReceiver(updateMapReceiver);
             //TEST_TAG
             unbindService(mConnection);
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        userHandler.cancelAllRequestWithTag(REQUEST_TAG);
+//        if(locationPermission) {
+//            unregisterReceiver(updateMapReceiver);
+//            //TEST_TAG
+//            unbindService(mConnection);
+//        }
     }
 
     @Override
