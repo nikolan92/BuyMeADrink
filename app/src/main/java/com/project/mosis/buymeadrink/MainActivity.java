@@ -257,12 +257,13 @@ public class MainActivity extends AppCompatActivity
                             ,Snackbar.LENGTH_LONG).show();
                     return;
                 }
-                if(mSearchView.getQuery().equals("")){
+                if(mSearchView.getQuery().trim().equals("")){
                     Snackbar.make(MainActivity.this.drawer,
                             "You need to enter some query first"
                             ,Snackbar.LENGTH_LONG).show();
                     return;
                 }
+                mSearchView.showProgress();
                 mSearchView.clearSuggestions();
                 questionHandler.searchQuestions(MainActivity.this.mSearchView.getQuery(),
                         category,range,
@@ -286,7 +287,7 @@ public class MainActivity extends AppCompatActivity
                     mSearchView.clearSuggestions();
                     mSearchView.setSearchHint("Search questions...");
                 }else{
-                    if(newQuery.equals(""))
+                    if(newQuery.trim().equals(""))
                         return;
                     mSearchView.showProgress();
 
