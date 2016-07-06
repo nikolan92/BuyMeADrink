@@ -248,8 +248,28 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 String category = categorySpn.getSelectedItem().toString();
-                int range = Integer.valueOf(rangeTw.getText().toString());
-                // Odavde su category i range na raspolaganju za dalje jebavanje.... :)
+                String range = rangeTw.getText().toString();
+                range = range.equals("")?"NOT_SET":range;
+
+                if(currentLocation==null) {
+                    Snackbar.make(MainActivity.this.drawer,
+                            "Wait until GPS find your location."
+                            ,Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+                if(mSearchView.getQuery().equals("")){
+                    Snackbar.make(MainActivity.this.drawer,
+                            "You need to enter some query first"
+                            ,Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+                mSearchView.clearSuggestions();
+                questionHandler.searchQuestions(MainActivity.this.mSearchView.getQuery(),
+                        category,range,
+                        currentLocation.getPosition().latitude,
+                        currentLocation.getPosition().longitude,
+                        REQUEST_TAG,
+                        new SearchQuestionListener(MainActivity.this));
             }
         });
 
@@ -269,11 +289,10 @@ public class MainActivity extends AppCompatActivity
                     mSearchView.showProgress();
 
                     questionHandler.searchQuestions(newQuery,
-                            "NOT_SET","NOT_SET",0,0,
+                            "NOT_SET","NOT_SET",-1,-1,
                             REQUEST_TAG,
                             new SearchQuestionListener(MainActivity.this));
                 }
-
             }
         });
         mSearchView.setOnBindSuggestionCallback(new SearchSuggestionsAdapter.OnBindSuggestionCallback() {

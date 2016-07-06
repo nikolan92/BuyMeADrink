@@ -16,6 +16,8 @@ import com.project.mosis.buymeadrink.Utils.VolleyHelperSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public class QuestionHandler {
@@ -116,6 +118,8 @@ public class QuestionHandler {
     public void searchQuestions(String query,String category,String range,double lat,double lng,String tag,final VolleyCallBack volleyCallBack){
 
         String requestUrl = Constants.QUESTION_URL+"/"+query+"/"+category+"/"+range+"/"+lat+"/"+lng;
+        requestUrl = requestUrl.replace(" ","%20");
+
         Log.i(LOG_TAG,"REQUEST URL"+requestUrl);
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, requestUrl, null, new Response.Listener<JSONObject>() {
