@@ -2,8 +2,8 @@ package com.project.mosis.buymeadrink.Utils;
 
 public final class Constants {
 
-    //private static final String HOST = "http://192.168.0.103";
-    private static final String HOST = "http://ad64624f.ngrok.io";
+    private static final String HOST = "http://192.168.0.103";
+    //private static final String HOST = "http://ad64624f.ngrok.io";
 
     public static final String LOG_IN_URL = HOST + "/api/login";
     public static final String USER_URL = HOST + "/api/user";

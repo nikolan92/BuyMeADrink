@@ -32,6 +32,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.toolbox.NetworkImageView;
@@ -45,6 +48,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.project.mosis.buymeadrink.Application.MyApplication;
 import com.project.mosis.buymeadrink.Application.SaveSharedPreference;
 import com.project.mosis.buymeadrink.DataLayer.DataObject.ObjectLocation;
@@ -94,6 +98,7 @@ public class MainActivity extends AppCompatActivity
     private User user;
     //Question
     private QuestionHandler questionHandler;
+    private ArrayList<Question> searchedQuestions;
     //Map
     private GoogleMap mMap;
     private HashMap<String,Marker> markers;
@@ -162,25 +167,6 @@ public class MainActivity extends AppCompatActivity
 
         //Request permission
         locationPermission();
-
-        //TEST_TAG
-        //if(locationPermission)
-        //bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-//        if(locationPermission){
-//            updateMapReceiver = new UpdateMapReceiver();
-//            IntentFilter intentFilter = new IntentFilter();
-//            intentFilter.addAction(LocationService.ACTION_UPDATE_FRIENDS_LOCATIONS);
-//            intentFilter.addAction(LocationService.ACTION_UPDATE_MY_LOCATION);
-//            registerReceiver(updateMapReceiver,intentFilter);
-//            //TEST_TAG
-//            bindService(new Intent(this,LocationService.class),mConnection,BIND_AUTO_CREATE);
-//        }
     }
 
     @Override
@@ -211,11 +197,6 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         userHandler.cancelAllRequestWithTag(REQUEST_TAG);
-//        if(locationPermission) {
-//            unregisterReceiver(updateMapReceiver);
-//            //TEST_TAG
-//            unbindService(mConnection);
-//        }
     }
 
     @Override
@@ -224,9 +205,6 @@ public class MainActivity extends AppCompatActivity
         //Stop service if user say so
         if(!leaveServiceOnAfterDestroy)
             stopService(new Intent(this, LocationService.class));
-        //TEST TAG
-//        if(locationPermission)
-//            unbindService(mConnection);
     }
 
     @Override
@@ -238,8 +216,42 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
-
+    /**
+     * Search question and search dialog
+     * */
     private void showFilterDialog(){
+        final Dialog dialog = new Dialog(this);
+
+        dialog.setContentView(R.layout.filter_search);
+        dialog.setTitle("Search Filter");
+
+        Button okBtn = (Button) dialog.findViewById(R.id.okBtn);
+        Button cancelBtn = (Button) dialog.findViewById(R.id.cancelBtn);
+        final Spinner categorySpn = (Spinner) dialog.findViewById(R.id.categorySpn);
+        final TextView rangeTw = (TextView) dialog.findViewById(R.id.rangeTw);
+        String[] categories = getResources().getStringArray(R.array.question_category_array);
+
+        ArrayAdapter<String> spinnerAdapter =  new ArrayAdapter<>(MainActivity.this, R.layout.support_simple_spinner_dropdown_item, categories);
+        categorySpn.setAdapter(spinnerAdapter);
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        okBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String category = categorySpn.getSelectedItem().toString();
+                int range = Integer.valueOf(rangeTw.getText().toString());
+                // Odavde su category i range na raspolaganju za dalje jebavanje.... :)
+            }
+        });
+
+        dialog.show();
+        dialog.getWindow().setLayout((6*getResources().getDisplayMetrics().widthPixels)/7, DrawerLayout.LayoutParams.WRAP_CONTENT);
 
     }
     private void setupFloatingSearch(){
@@ -249,12 +261,22 @@ public class MainActivity extends AppCompatActivity
                 if (!oldQuery.equals("") && newQuery.equals("")) {
                     mSearchView.clearSuggestions();
                 }else{
-                    //mSearchView.showProgress();
-                    ArrayList<SearchResult> list = new ArrayList<SearchResult>();
-                    list.add(new SearchResult("Test"));
-                    list.add(new SearchResult("Test2"));
+                    if(newQuery.equals(""))
+                        return;
+                    mSearchView.showProgress();
+//                    ArrayList<SearchResult> list = new ArrayList<SearchResult>();
+//                    list.add(new SearchResult("Test"));
+//                    list.add(new SearchResult("Test2"));
 
-                    mSearchView.swapSuggestions(list);
+                    //mSearchView.swapSuggestions(list);
+
+//                    currentLocation.getPosition().latitude,
+//                            currentLocation.getPosition().longitude,
+
+                    questionHandler.searchQuestions(newQuery,
+                            "NOT_SET","NOT_SET",0,0,
+                            REQUEST_TAG,
+                            new SearchQuestionListener(MainActivity.this));
                 }
 
             }
@@ -275,10 +297,44 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onActionMenuItemSelected(MenuItem item) {
                 showFilterDialog();
-                Toast.makeText(MainActivity.this,"Filter clicked",Toast.LENGTH_LONG).show();
             }
         });
+
     }
+    public void  onSearchDataReady(JSONObject result){
+        mSearchView.hideProgress();
+        ArrayList<SearchResult> searchResults = new ArrayList<>();
+        //this is for later use when user click on some item
+        searchedQuestions = new ArrayList<>();
+        try {
+            if(result.getBoolean("Success")){
+                JSONArray jsonArray = result.getJSONArray("Data");
+                for(int i=0;i<jsonArray.length();i++){
+                    Log.i(LOG_TAG,jsonArray.get(i).toString());
+                    Question question = new Gson().fromJson(jsonArray.get(i).toString(),Question.class);
+                    searchedQuestions.add(question);
+                    searchResults.add(new SearchResult(question.getQuestion()));
+                    mSearchView.swapSuggestions(searchResults);
+                }
+            }else{
+                searchResults.add(new SearchResult("There is no question like you want."));
+                mSearchView.swapSuggestions(searchResults);
+            }
+        } catch (JSONException e) {
+            Log.e(LOG_TAG,e.toString());
+            searchResults.add(new SearchResult("Something goes wrong try again later."));
+            mSearchView.swapSuggestions(searchResults);
+        }
+    }
+    public void onSearchFailed(){
+        mSearchView.hideProgress();
+        ArrayList<SearchResult> searchResults = new ArrayList<>();
+        searchResults.add(new SearchResult("Something goes wrong try again later."));
+        mSearchView.swapSuggestions(searchResults);
+    }
+    /**
+     * Drawer and layout setup
+     * */
     private void setupDrawer(){
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         assert navigationView != null;
@@ -410,18 +466,17 @@ public class MainActivity extends AppCompatActivity
 
     public void serviceSwitcher(boolean isChecked){
         if(isChecked){
-            //TODO:Save shared preferences (service running normally)
+            //Save shared preferences (service running normally)
             SaveSharedPreference.SetServiceSettings(this,true);
             leaveServiceOnAfterDestroy = true;
         }else{
-            //TODO:Save shared preferences (stop service after activity destroy)
+            //Save shared preferences (stop service after activity destroy)
             SaveSharedPreference.SetServiceSettings(this,false);
             leaveServiceOnAfterDestroy = false;
         }
         Toast.makeText(MainActivity.this, isChecked?"Service turned on.":"Service turned off.", Toast.LENGTH_SHORT).show();
 
     }
-
     /**
      *On Activity result
      *=================================================================================================
@@ -447,8 +502,8 @@ public class MainActivity extends AppCompatActivity
             }
         }else if(requestCode == ANSWER_THE_QUESTION_ACTIVITY_REQUSET_CODE){
             if(resultCode == RESULT_OK){
-                data.getStringExtra("questionID");
-                //TODO:remove question from the map
+                String questionId = data.getStringExtra("questionID");
+                removeQuestionFromMap(questionId);
             }
         }
     }
@@ -809,6 +864,29 @@ public class MainActivity extends AppCompatActivity
                 Log.e(mainActivity.LOG_TAG,error);
         }
     }
+    private static class SearchQuestionListener implements VolleyCallBack{
+        private final WeakReference<MainActivity> mActivity;
+        SearchQuestionListener(MainActivity mainActivity){
+            mActivity = new WeakReference<>(mainActivity);
+        }
+        @Override
+        public void onSuccess(JSONObject result) {
+            MainActivity mainActivity = mActivity.get();
+            if(mainActivity!=null)//If activity still exist then do some job, if not just return;
+                mainActivity.onSearchDataReady(result);
+        }
+
+        @Override
+        public void onFailed(String error) {
+            MainActivity mainActivity = mActivity.get();
+            if(mainActivity!=null)//If activity still exist then do some job, if not just return;
+            {
+                mainActivity.onSearchFailed();
+                Log.e(mainActivity.LOG_TAG, error);
+            }
+        }
+
+    }
     private class MyMarker {
         private String _id;
         private boolean isItFriendMarker;
@@ -824,4 +902,5 @@ public class MainActivity extends AppCompatActivity
             return isItFriendMarker;
         }
     }
+
 }

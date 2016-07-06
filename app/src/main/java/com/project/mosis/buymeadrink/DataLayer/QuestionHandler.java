@@ -112,4 +112,26 @@ public class QuestionHandler {
         mVolleyHelper.cancelPendingRequests(tag);
         //TODO: When activity call onStop() this function must be called because if you not call this fun Volley will call your handler and app will crash
     }
+
+    public void searchQuestions(String query,String category,String range,double lat,double lng,String tag,final VolleyCallBack volleyCallBack){
+
+        String requestUrl = Constants.QUESTION_URL+"/"+query+"/"+category+"/"+range+"/"+lat+"/"+lng;
+        Log.i(LOG_TAG,"REQUEST URL"+requestUrl);
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, requestUrl, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if(volleyCallBack!=null)
+                    volleyCallBack.onFailed(error.toString());
+            }
+        });
+        jsonObjectRequest.setTag(tag);
+        mVolleyHelper.addToRequestQueue(jsonObjectRequest);
+    }
 }

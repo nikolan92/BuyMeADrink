@@ -83,7 +83,7 @@ public class AddQuestionActivity extends AppCompatActivity {
         //category spinner
         categorySpinner = (Spinner) findViewById(R.id.add_question_spinner_category);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.add_question_category_array,android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.question_category_array,android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         categorySpinner.setAdapter(adapter);
