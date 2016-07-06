@@ -34,11 +34,14 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.toolbox.NetworkImageView;
 import com.arlib.floatingsearchview.FloatingSearchView;
+import com.arlib.floatingsearchview.suggestions.SearchSuggestionsAdapter;
+import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -264,14 +267,6 @@ public class MainActivity extends AppCompatActivity
                     if(newQuery.equals(""))
                         return;
                     mSearchView.showProgress();
-//                    ArrayList<SearchResult> list = new ArrayList<SearchResult>();
-//                    list.add(new SearchResult("Test"));
-//                    list.add(new SearchResult("Test2"));
-
-                    //mSearchView.swapSuggestions(list);
-
-//                    currentLocation.getPosition().latitude,
-//                            currentLocation.getPosition().longitude,
 
                     questionHandler.searchQuestions(newQuery,
                             "NOT_SET","NOT_SET",0,0,
@@ -279,6 +274,23 @@ public class MainActivity extends AppCompatActivity
                             new SearchQuestionListener(MainActivity.this));
                 }
 
+            }
+        });
+        mSearchView.setOnBindSuggestionCallback(new SearchSuggestionsAdapter.OnBindSuggestionCallback() {
+            @Override
+            public void onBindSuggestion(View suggestionView, ImageView leftIcon, TextView textView, SearchSuggestion item, final int itemPosition) {
+                if(!item.getBody().equals("There is no question like you want."))
+                {
+                    leftIcon.setImageResource(R.mipmap.ic_question_mark_big);
+                }else{
+                    leftIcon.setImageResource(R.mipmap.ic_not_found);
+                }
+                suggestionView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                       MainActivity.this.changeMapCenter(itemPosition);
+                    }
+                });
             }
         });
         mSearchView.setOnLeftMenuClickListener(new FloatingSearchView.OnLeftMenuClickListener() {
@@ -668,13 +680,12 @@ public class MainActivity extends AppCompatActivity
             Bitmap icon = ((BitmapDrawable)userImage.getDrawable()).getBitmap();
             Bitmap smallIcon = Bitmap.createScaledBitmap(icon,100,100,false);//Sony xperia mini 40x40
             MarkerOptions markerOptions = new MarkerOptions().position(globalCurrentLocation).title("Me").icon(BitmapDescriptorFactory.fromBitmap(smallIcon));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(globalCurrentLocation,12));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(globalCurrentLocation,15));
 
             currentLocation = mMap.addMarker(markerOptions);
             markerOnClick.put(currentLocation,new MyMarker(user.getId(),true));
         }
     }
-
     private void updateFriendsLocation(ArrayList<ObjectLocation> friends_location){
         //if map is not ready yet which should not ever happen then return
         if(mMap==null)
@@ -711,7 +722,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-
     private void showQuestions(ArrayList<Question> questions){
         for(int i=0;i<questions.size();i++){
             LatLng latLng = new LatLng(questions.get(i).getLat(),questions.get(i).getLng());
@@ -738,6 +748,14 @@ public class MainActivity extends AppCompatActivity
         Marker questionForRemove = markers.remove(questionId);
         markerOnClick.remove(questionId);
         questionForRemove.remove();
+    }
+
+    private void changeMapCenter(int i){
+        if(mMap!=null){
+            Question question = searchedQuestions.get(i);
+            LatLng latLng = new LatLng(question.getLat(),question.getLng());
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
+        }
     }
     /**
      *
