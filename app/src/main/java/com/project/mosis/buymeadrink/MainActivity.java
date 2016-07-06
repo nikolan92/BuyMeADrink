@@ -278,11 +278,13 @@ public class MainActivity extends AppCompatActivity
 
     }
     private void setupFloatingSearch(){
+        mSearchView.setSearchHint("Search questions...");
         mSearchView.setOnQueryChangeListener(new FloatingSearchView.OnQueryChangeListener() {
             @Override
             public void onSearchTextChanged(String oldQuery, String newQuery) {
                 if (!oldQuery.equals("") && newQuery.equals("")) {
                     mSearchView.clearSuggestions();
+                    mSearchView.setSearchHint("Search questions...");
                 }else{
                     if(newQuery.equals(""))
                         return;
@@ -301,15 +303,15 @@ public class MainActivity extends AppCompatActivity
                 if(!item.getBody().equals("There is no question like you want."))
                 {
                     leftIcon.setImageResource(R.mipmap.ic_question_mark_big);
+                    suggestionView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            MainActivity.this.changeMapCenter(itemPosition);
+                        }
+                    });
                 }else{
                     leftIcon.setImageResource(R.mipmap.ic_not_found);
                 }
-                suggestionView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                       MainActivity.this.changeMapCenter(itemPosition);
-                    }
-                });
             }
         });
         mSearchView.setOnLeftMenuClickListener(new FloatingSearchView.OnLeftMenuClickListener() {
@@ -771,9 +773,13 @@ public class MainActivity extends AppCompatActivity
 
     private void changeMapCenter(int i){
         if(mMap!=null){
+            if(searchedQuestions.size()==0)
+                return;
             Question question = searchedQuestions.get(i);
             LatLng latLng = new LatLng(question.getLat(),question.getLng());
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
+            mSearchView.clearSuggestions();
+            mSearchView.setSearchHint("Search questions...");
         }
     }
     /**
